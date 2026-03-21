@@ -1,0 +1,11 @@
+# Source PDF (large binary — distribute separately)
+*.pdf
+*:Zone.Identifier
+
+# Extracted text (derived artifact, regenerate with pdfminer)
+cba_text.txt
+
+# Python
+__pycache__/
+*.pyc
+.env

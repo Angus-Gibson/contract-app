@@ -1,0 +1,452 @@
+[
+  {
+    "section": "2.AAA / 11.D.4",
+    "title": "Trip Rig (Sequence Rig) — Definition and Application",
+    "trigger_condition": "Actual flight time on a sequence is less than 1 hour for every 3 hours 30 minutes of TAFB (Time Away From Base)",
+    "remedy": "Pay and credit 1:3.5 prorated. Difference credited as continuation of last leg back to crew base.",
+    "timing_constraints": "Applied automatically per sequence; verify on pay stub",
+    "notes": "Does NOT apply to FA who caused a sequence split (10.M.3.a). Recalculated from point of split for Company-initiated splits (10.M.2.a). One of four possible pay floors in 11.D.1.",
+    "edge_cases": ["Last Live Leg Swap may reduce effective TAFB if swap changes sequence composition", "Changeover sequences: Trip Rig based on original carryover value if FA held the carryover at time of changeover conversion (10.J.12.c)"]
+  },
+  {
+    "section": "2.P / 11.D.5",
+    "title": "Duty Rig (1:2) — Definition and Application",
+    "trigger_condition": "Actual on-duty time exceeds double the actual flight time for a given duty period",
+    "remedy": "1 hour pay and credit for every 2 hours actual on-duty time, prorated to the minute. On-duty begins at report (1hr DOM, 1hr15min IPD prior to departure) and ends 15min (DOM) or 30min (NIPD/IPD) after arrival.",
+    "timing_constraints": "Applied per duty period; verify against actual departure/arrival times",
+    "notes": "When layover rest < 10 hours (11.J.2): FA is considered continuously on-duty — all Duty Rigs and premiums apply. FA causing a split: Duty Rig only for completed duty periods before/after the split day (10.M.3.b). Reserve Standby pre-sequence time: 1:1.25 rate (12.F.9.b) — more favorable than 1:2.",
+    "edge_cases": ["Last Live Leg Swap: duty time continues for the FA who gave away the LLL per the original sequence release time", "If sequence is rescheduled to shorter duty but FA was on duty longer: actual on-duty time governs, not scheduled"]
+  },
+  {
+    "section": "11.D.6",
+    "title": "Sit Rig — Sit Times Over 2 Hours 30 Minutes",
+    "trigger_condition": "Actual sit time between flight segments WITHIN a duty period exceeds 2 hours 30 minutes",
+    "remedy": "1 minute of pay (NO credit) for every 2 minutes of sit time in excess of 2:30. Applied to each actual sit time above threshold. Paid in addition to all other sequence pay.",
+    "timing_constraints": "File DirectConnect claim with actual departure/arrival times for each segment in the affected duty period",
+    "notes": "PAY ONLY — does not count toward monthly max or Reserve calling-out-of-time. Does NOT apply to ODAN sequences (11.L). Only applies within a DUTY PERIOD (not at layovers between duty periods). A common underclaimed provision requiring tracking of actual gate times.",
+    "edge_cases": ["Last Live Leg Swap: if swap alters segment timing within a duty period, recalculate sit rig based on actual sit times after swap", "Sit Rig applies to each individual sit time exceeding 2:30 within a duty period — if two sits both exceed 2:30, both are claimable"]
+  },
+  {
+    "section": "10.J.10",
+    "title": "Reschedule Pay Protection — General (Foundational Provision)",
+    "trigger_condition": "Lineholder is rescheduled per 10.J.2 (pre-report), 10.J.3 (post-report/pre-origination), or 10.J.4 (post-origination). Also applies to crew/equipment substitution victims.",
+    "remedy": "Pay and credit at the GREATER of originally awarded sequence value (as published in electronic bid package, including cancelled segments) or actual time flown. All premiums from original trip included per 10.V.5.",
+    "timing_constraints": "Premium protections follow original trip per 10.V.5. File DirectConnect claim.",
+    "notes": "This is the foundational reschedule guarantee. For sequences not in bid package (ferry, extra sections): pay protected to posted value prior to award. Reserve on TTS/UBL/ETB trip treated as Lineholder (10.J.1.d).",
+    "edge_cases": ["Last Live Leg Swap: FA who swapped onto another FA's last live leg receives NO pay protection if their own sequence is then disrupted (10.P.4)", "Equipment downgrade exception: released FA gets original premiums per 10.J.9.a; FA staying on downgraded equipment gets only downgraded premiums"]
+  },
+  {
+    "section": "10.J.3.d",
+    "title": "Post-Report Pre-Origination — Notification Window Violation",
+    "trigger_condition": "FA crew disrupted after report but before origination; Company fails to electronically advise FA of rescheduled sequence/assignment within the required window",
+    "remedy": "FA released for that duty day with pay protection under 10.J.10 (original sequence value).",
+    "timing_constraints": "Window: 4 hours after originally scheduled sign-in time OR 3 hours after disruption is known — whichever is LATER. Failure to notify within window triggers release.",
+    "notes": "Distinct from post-origination window (10.J.4.c = 3 hours). Both windows independently claimable.",
+    "edge_cases": ["FA who voluntarily elects release per 10.J.8 (3+ hour delay option) forfeits all 10.J pay/credit protections"]
+  },
+  {
+    "section": "10.J.4.c",
+    "title": "Post-Origination — Notification Window Violation",
+    "trigger_condition": "FA crew disrupted after origination (departure of first flight); Company fails to advise FA of remaining duty assignment within 3 hours of disruption being known",
+    "remedy": "FA released for that duty day with pay protection under 10.J.10.",
+    "timing_constraints": "3 hours from when disruption is known",
+    "notes": "Narrower window than pre-origination (10.J.3.d = 4hr/3hr rule). Post-origination disruptions are time-critical.",
+    "edge_cases": []
+  },
+  {
+    "section": "10.J.8",
+    "title": "3+ Hour Delay Release Option — Forfeiture Warning",
+    "trigger_condition": "Flight departure delayed more than 3 hours after FA has reported; other FAs available as replacements.",
+    "remedy": "FA may request release from duty. FA stays until relief FA reports. No pay obligation beyond actual duty time.",
+    "timing_constraints": "Request after report. Relief FA must report before FA can depart.",
+    "notes": "CRITICAL: Exercising this option FORFEITS all pay/credit that would otherwise accumulate under ANY other Section 10 paragraph. FA who takes this option CANNOT then file 10.J.10 pay protection. Not a claimable pay provision — it is an opt-out.",
+    "edge_cases": ["Delay must be 'more than' 3 hours — exactly 3:00 does not qualify"]
+  },
+  {
+    "section": "10.J.9.a",
+    "title": "Equipment Downgrade — Excess FA Released With Full Pay and Premiums",
+    "trigger_condition": "Smaller equipment substituted prior to departure for entire sequence; sequence was fully staffed; most senior FA(s) exceed required bid complement for downgraded aircraft.",
+    "remedy": "Most senior FA(s) released with pay and credit at hourly rate plus all applicable premiums (at original sequence rates per 10.V.5).",
+    "timing_constraints": "Prior to departure",
+    "notes": "For partial-sequence downgrade: 10.J.9.b — junior FAs fly smaller aircraft; most senior deadhead (jumpseat if available). Excess FAs beyond largest remaining aircraft complement are released at crew base transit.",
+    "edge_cases": ["Last Live Leg Swap pending when downgrade occurs: FA who gave up LLL and is released due to downgrade still receives original sequence pay protection; FA who swapped onto LLL has no pay protection per 10.P.4"]
+  },
+  {
+    "section": "10.J.11.b",
+    "title": "Trip Cancelled Less Than 3 Hours Before Report — 3-Hour Pay, No Credit",
+    "trigger_condition": "FA electronically notified LESS THAN 3 hours prior to their report time that their trip has been cancelled in its entirety.",
+    "remedy": "3 hours flight time pay, NO credit — regardless of whether FA actually reported to the airport.",
+    "timing_constraints": "Notification must occur less than 3 hours prior to report time. File DirectConnect claim.",
+    "notes": "Pay, no credit — does not count toward monthly maximum. Distinct from 11.D.3 (Report No Fly = requires actual airport reporting). Notification 3+ hours before report: FA 'considered notified' per 10.J.11.a, no 3-hour pay trigger.",
+    "edge_cases": ["If FA reported despite notification, 11.D.3 Call Out Pay may be higher — FA should claim the greater remedy"]
+  },
+  {
+    "section": "10.J.12",
+    "title": "Changeover Sequence Pay Protection",
+    "trigger_condition": "FA holds a carryover sequence (reports in one month, releases next month) which becomes a changeover sequence (modified, placed on schedule by 10th of origination month); FA flies the changeover sequence.",
+    "remedy": "Pay protected to value of ORIGINAL carryover sequence scheduled hours at time of assignment (per 10.J.10).",
+    "timing_constraints": "To reject changeover: FA must notify Crew Scheduling electronically no later than 1100 DFW on the 15th of the origination month. Rejection forfeits all pay protection and line guarantees.",
+    "notes": "FA must have been holding the carryover at the time it became a changeover to claim original value protection. FA removed via 10.K while holding qualifying changeover: pay protected to original carryover value.",
+    "edge_cases": ["Last Live Leg Swap on the changeover sequence: sequence value for pay protection uses original carryover value, not post-LLL-swap value"]
+  },
+  {
+    "section": "10.K.1",
+    "title": "Illegal Through No Fault — Non-Last Sequence",
+    "trigger_condition": "After time of award, FA becomes FAR or contractually illegal through no fault of their own to originate a sequence that is NOT their last sequence of the bid month.",
+    "remedy": "Option to split on at point sequence passes through crew base. If impractical for Company to split FA back on: FA released and paid FULL value of originally scheduled sequence. If split on: pay protected for portion(s) flown by substitute crew up to split-back point.",
+    "timing_constraints": "If this is the LAST sequence: pay protection calculated under 10.L.4 instead.",
+    "notes": "FA must be FAR Illegal, OR be a Lineholder/Reserve on ETB/TTS/UBL trip. Regular Reserve on Reserve day NOT eligible for 10.K except as specified in 10.K.1.b. Reserve on Flex Days (ETB/TTS/UBL) who was then assigned an overlapping sequence: NO pay protection per 10.K.1.b.",
+    "edge_cases": ["Last Live Leg Swap: FA who gave away their last live leg and becomes illegal — no pay protection for the LLL portion (10.P.4)"]
+  },
+  {
+    "section": "10.K.2",
+    "title": "Illegal After Award But Prior to Origination — Projected Illegality",
+    "trigger_condition": "After award but prior to origination, FA remains legal to originate but is PROJECTED to become illegal through no fault of their own to complete the sequence.",
+    "remedy": "FA must originate and split off at latest legal point through crew base. Pay protected for portions flown by substitute after split. If last sequence of month: paid/credited for remainder regardless of whether substitute flew.",
+    "timing_constraints": "FA may request to drop with Company consent, waiving pay protection.",
+    "notes": "The projection at award time is key — distinguishes from 10.K.1 (already illegal at origination).",
+    "edge_cases": []
+  },
+  {
+    "section": "10.K.3",
+    "title": "Illegal After Origination",
+    "trigger_condition": "After originating a sequence, FA becomes illegal to complete it.",
+    "remedy": "Split off at latest legal point. Pay protected for portions flown by substitute after split. If last sequence: paid per 10.L.4.",
+    "timing_constraints": "Company determines split point",
+    "notes": "Chain: 10.K.3 routes to 10.L.4 if last sequence of month.",
+    "edge_cases": ["Last Live Leg Swap caveat identical to 10.K.1"]
+  },
+  {
+    "section": "10.L.1",
+    "title": "Last Sequence of Month — Cancelled in Entirety OR Illegal to Originate",
+    "trigger_condition": "Lineholder's last series of sequences in bid month is cancelled in its entirety, OR Lineholder is illegal through no fault to originate last sequence.",
+    "remedy": "Lineholder paid AND credited for the ENTIRE sequence — full value, no obligation to fly.",
+    "timing_constraints": "File DirectConnect claim within 96 hours referencing 10.L.1",
+    "notes": "Most powerful last-sequence protection. Full pay AND credit (not just pay). Reserve eligibility: must have completed last Reserve sequence for the month (called out of time, OR no Reserve days remaining) per 10.L.6.",
+    "edge_cases": ["Last Live Leg Swap: sequence value calculation uses original published sequence, not post-swap composition", "If sequence was a changeover: sequence value uses original carryover value if FA held the carryover"]
+  },
+  {
+    "section": "10.L.3",
+    "title": "Last Sequence of Month — Origination Cancels (Company Request for Split)",
+    "trigger_condition": "Lineholder's last sequence origination flight cancels (whether known before or after report). Company may request FA to split onto remaining sequence.",
+    "remedy": "Company requests split + FA complies: FA pay protected for cancelled portions. Company does NOT request split: FA released and pay protected for ENTIRE sequence.",
+    "timing_constraints": "Company notification of split must occur PRIOR to completion of first scheduled duty period. If FA reports and signs in for the sequence, hotel accommodations provided if sequence doesn't originate same day.",
+    "notes": "Failure by Company to affirmatively request the split = full sequence pay protection without FA flying obligation. Key distinction from 10.L.1 (entirely cancelled with no split option).",
+    "edge_cases": ["Last Live Leg Swap: if the LLL was part of the cancelled origination, sequence value calculation affected"]
+  },
+  {
+    "section": "10.L.4",
+    "title": "Last Sequence of Month — Some Portions Cancel Post-Origination",
+    "trigger_condition": "Lineholder is legal to originate and complete last sequence, but some portion(s) cancel after origination. Also invoked via 10.K.1.c, 10.K.2, 10.K.3.",
+    "remedy": "FA pay protected for all cancelled portions but obligated to fly uncancelled portions. Pay and credit for cancelled segments added to actual flying.",
+    "timing_constraints": "Ongoing through sequence; file DirectConnect claim at sequence completion",
+    "notes": "Acts as a floor when 10.K provisions chain here. FA still flies — not a full release provision. Different from 10.L.1 (FA does not fly at all).",
+    "edge_cases": ["Last Live Leg Swap: if original FA gave away last live leg and that leg then cancels, original FA's pay protection calculation depends on whether they still hold the broader sequence"]
+  },
+  {
+    "section": "10.L.5 (claim convention ref: 10.T.5)",
+    "title": "Last Sequence of Month — Rescheduled (Practitioner Convention)",
+    "trigger_condition": "Lineholder is rescheduled to different flying while on last sequence or series of sequences (per 10.J.4 post-origination rescheduling). If rescheduling constitutes a Crew Scheduling error, 10.T.3 applies.",
+    "remedy": "Operational reschedule: pay protected at original sequence value per 10.J.10. Crew Scheduling error after report: 150% pay for entire sequence (100% pay/credit + 50% pay no credit) per 10.T.3.",
+    "timing_constraints": "DirectConnect claim within 96 hours. Standard claim language: 'SEQ XXXXX/DDMMM was my last sequence/series. I was rescheduled to different flying [prior to/after] origination in violation of 10.L.[1/3/4]. Please review and pay error pay consistent with 10.T.3/10.T.5, 50% sequence value.'",
+    "notes": "The '10.T.5' reference in standard DirectConnect claim language invokes the error-pay premium. The actual CBA provision for 150% after-report errors is 10.T.3. Claims should cite both 10.L and 10.T.3.",
+    "edge_cases": ["Last Live Leg Swap: must flag — if LLL swap occurred, sequence value for the 150% calculation is the original published sequence before the swap", "If rescheduling occurs PRIOR to origination, this is governed by 10.J.2/10.J.3 pay protections combined with 10.L.1 or 10.L.3 as applicable"]
+  },
+  {
+    "section": "10.M.2",
+    "title": "Company-Initiated Sequence Split — Pay and Credit",
+    "trigger_condition": "Company initiates a split; FA being split off is NOT the one who caused the split.",
+    "remedy": "Trip Rig and Duty Rig calculated to/from point of split including necessary deadhead and report/debrief. Sequence recalculated with 5-hour average duty period for each day. Deadhead duty period pay: greater of 3 hours or actual deadhead time.",
+    "timing_constraints": "Applied at time of split",
+    "notes": "Contrast with 10.M.3 (FA who caused split): NO Trip Rig, Duty Rig only for completed duty periods, 3-hour minimum or actual for completed periods. The split table in 10.M summarizes the pay/credit rules for both scenarios.",
+    "edge_cases": ["Last Live Leg Swap: if split triggered by LLL swap recipient's sequence disruption, original FA who gave up the LLL has no pay protection (10.P.4)"]
+  },
+  {
+    "section": "10.P",
+    "title": "Last Live Leg Swap — CRITICAL RULE ENGINE FLAG",
+    "trigger_condition": "A Lineholder or Reserve (released into/on a day off, or released for future sequence) swaps onto another FA's last live leg.",
+    "remedy": "FA swapping ONTO flight: NO pay for flights flown; NO pay protection if their own sequence is disrupted. FA giving AWAY the last live leg: governed by their original sequence pay protections (they retain their sequence pay structure, but the LLL itself is now being flown by another).",
+    "timing_constraints": "Both FAs must request electronically; Company confirms within 15 minutes; no delay to boarding/departure permitted.",
+    "notes": "FLAG EVERY PAY PROVISION when LLL swap is detected. For pay protection calculations (10.J.10, 10.L, 10.K), check whether the LLL was the highest-value leg and whether excluding it changes the sequence value. The FA who swapped onto the LLL and then becomes illegal for their own sequence: NO pay protection. If deadhead following LLL becomes live segment: replacement FA MUST work it and must be legal.",
+    "edge_cases": ["Reserve on a day off performing LLL swap: still gets no pay per 10.P.4", "FA who gives away LLL on their LAST SEQUENCE: the LLL is no longer 'part of the sequence' for pay protection calculation purposes if the swap is approved — consult the sequence value at time of original award"]
+  },
+  {
+    "section": "10.T.1.a",
+    "title": "Double Covered Position — Lineholder or Reserve on Day Off",
+    "trigger_condition": "Lineholder or Reserve (with sequence on a day off) awarded/assigned a sequence via PBS/TTS/UBL/ETB, but at check-in is NOT listed in their awarded/assigned position.",
+    "remedy": "FA who was awarded/assigned first has priority (by seniority). Claim: first 1-3 duty periods depending on check-in timing. Remaining sequence pay protected if FA goes on UBL and bids 'like' sequences (comparable check-in/out, same days, same type DOM/NIPD/IPD).",
+    "timing_constraints": "File DirectConnect claim within 96 hours of misaward per 10.T.2.a.ii",
+    "notes": "FA not required to split sequence to be pay protected. The most senior FA of those double-covered who files within the time constraint wins pay protection.",
+    "edge_cases": []
+  },
+  {
+    "section": "10.T.2",
+    "title": "Misaward — TTS/UBL/ETB/ROTA/D",
+    "trigger_condition": "Error in TTS/UBL, ETB, or ROTA/D results in sequence award on a day off that should not have been awarded; or trip removed in error by Company.",
+    "remedy": "Confirmed misaward + FA flies: Lineholder = 150% pay, 100% credit; Reserve on day off = 150% pay, NO credit. FA removed from misawarded sequence: pay protected at original sequence value at time of award. Only ONE FA paid per misawarded sequence — most senior claimant within 96 hours wins.",
+    "timing_constraints": "CRITICAL: Electronic claim (DirectConnect) within 96 HOURS of the run with the potential misaward. FA must bid 'like sequences' per applicable process: TTS (3 runs minimum), UBL (daily bids until 1500 HBT day prior), ETB (TTS/UBL immediately following), ROTA/D (remain available all calendar days). Updated claim with run numbers and any awarded sequences required.",
+    "notes": "ETB sequence picked up WITHIN the footprint of a pay-protected sequence negates protection. FA who picks up for pay protection and drops via TTS/ETB loses protection. Pay protection based on ORIGINAL sequence value at time of award.",
+    "edge_cases": ["Last Live Leg Swap on misawarded sequence: pay protection based on original sequence value at time of award, not post-swap value"]
+  },
+  {
+    "section": "10.T.3",
+    "title": "Crew Scheduling Error After Report — 150% for Entire Sequence",
+    "trigger_condition": "After FA has reported for a sequence, ANY violation of Scheduling (Sec 10), Hours of Service (Sec 11), Speaker, International, or Reserve sections of this Agreement occurs.",
+    "remedy": "Pay at time and a half for the ENTIRE sequence: 100% pay and credit PLUS 50% pay no credit (= 150% total pay, 100% credit). Does NOT apply to double-covered positions (10.T.1) or misawards (10.T.2) which have their own remedies.",
+    "timing_constraints": "File DirectConnect claim as soon as violation occurs. Reference 10.T.3 (and colloquially '10.T.5' per standard claim language). Standard claim: '[Description of violation]. Please review and pay error pay consistent with 10.T.3, 50% sequence value.'",
+    "notes": "The 50% premium applies to the ENTIRE sequence — not just the violated leg. This is the most powerful and frequently applicable pay-error provision. If dispute exists: resolved via Section 30/31 grievance process. When combined with Last Sequence protections (10.L), this creates the strongest pay claim scenario.",
+    "edge_cases": ["Last Live Leg Swap: 'entire sequence' value for 150% calculation uses original published sequence before the LLL swap", "Understaffing violation after report: triggers both 3.F ($10.50/hr understaffing pay) AND 10.T.3 (150% for entire sequence) — both claims may be filed simultaneously"]
+  },
+  {
+    "section": "3.B",
+    "title": "Minimum Monthly Guarantee — Lineholder (71hr) and Reserve (75hr)",
+    "trigger_condition": "End of bid month: FA's credited hours fall below minimum monthly guarantee.",
+    "remedy": "Lineholder: 71 hours at hourly rate. Reserve: 75 hours at hourly rate. Partial month proration: Lineholder = 71/days-in-month × active days; Reserve = 75/days-in-month × active days (or 3:56/day for 31-day month, 4:10/day for 30-day month).",
+    "timing_constraints": "Payable by end of bid month payroll cycle",
+    "notes": "Lineholder who voluntarily gives up sequences via ETB/TTS to fall below 71 hours: guarantee proportionally reduced. Reserve calling out of time does not reduce the 75-hour guarantee for hours accrued before calling out.",
+    "edge_cases": ["Aggressive Reserve hours above 40 per month do NOT count toward calling-out-of-time (12.K.4.b) but DO count toward the 75-hour guarantee"]
+  },
+  {
+    "section": "3.C",
+    "title": "Purser / Lead / Galley Position Premiums",
+    "trigger_condition": "FA holds Purser, Lead, or Galley position on a flight.",
+    "remedy": "Per hour premium per 3.C table: DOM/NIPD Lead = $3.25/hr (most aircraft), A321T Lead = $4.75/hr, NIPD 3-class Transcon Lead = $5.75/hr*, IPD Purser/Lead = $5.75/hr (most), $6.50/hr (B777/B787/A321XLR), IPD Galley = $2.00/hr. Rates paid per credited hour on position.",
+    "timing_constraints": "Applied per sequence; verify on pay stub",
+    "notes": "Premiums carry into pay protection (10.V.5). NOT paid during sick leave, bereavement, jury duty, or settling days (3.L). Vacation: only if 100% of PBS award credit hours include the premium. FA improperly displaced from bid position: may claim position premium for displaced hours.",
+    "edge_cases": ["FA displaced from position (prohibited per 10.S except for specific International exceptions in 14.L): claim position premium PLUS potential 10.T.3 error pay"]
+  },
+  {
+    "section": "3.D",
+    "title": "Boarding Pay",
+    "trigger_condition": "FA boards a flight segment (including if all passengers deplane post-boarding, or if flight cancels after boarding).",
+    "remedy": "Pay, NO credit = 50% of FA's hourly rate for all minutes of the established boarding time for the flight segment.",
+    "timing_constraints": "File via trip reconciliation or DirectConnect claim",
+    "notes": "Not applicable for standby boarding unless FA actually works the flight segments (3.D.1.c). Exception: does not apply to charter boarding per Section 18.E.",
+    "edge_cases": []
+  },
+  {
+    "section": "3.E",
+    "title": "Holding Time / Ground Time Compensation",
+    "trigger_condition": "Originating/intermediate stations: ground time exceeds scheduled ground time by 30+ minutes. Crew change stations: FA required to remain with passengers while waiting for replacement crew beyond 45 minutes.",
+    "remedy": "$7.00 per hour or FRACTION thereof for all time with passengers beyond the threshold. Pay, no credit. Does NOT run concurrently with ATC Hold/Code 59 pay (3.M).",
+    "timing_constraints": "File DirectConnect claim with scheduled vs. actual departure times. Note: fraction = 31 minutes = 1 hour = $7.00.",
+    "notes": "Ground holding triggers 30 minutes after scheduled departure at originating/intermediate stations. Through crew with no posted delay: only if actual departure >30 minutes after SCHEDULED departure regardless of arrival delay. Through crew with posted delay: holding triggered 31 minutes after the POSTED departure time.",
+    "edge_cases": []
+  },
+  {
+    "section": "3.F",
+    "title": "Understaffing Pay",
+    "trigger_condition": "Flight dispatched with fewer FAs than required by staffing parameters in Section 10 (one or more positions unfilled).",
+    "remedy": "$10.50 per credited hour, prorated to the nearest minute, for EACH FA working the understaffed flight/sequence.",
+    "timing_constraints": "File DirectConnect claim referencing understaffed flight number(s) and staffing shortfall",
+    "notes": "All working FAs on the flight receive the premium — not just those 'covering' extra positions. $10.50/hr is additive to regular pay. If error occurs after report: ALSO triggers 10.T.3 (150% for entire sequence) — file both claims.",
+    "edge_cases": ["Staffing determination based on Company's published staffing parameters for that specific aircraft/load configuration — verify against published staffing formula"]
+  },
+  {
+    "section": "3.G",
+    "title": "International Pay (NIPD and IPD)",
+    "trigger_condition": "FA operates or deadheads on a NIPD segment or is on an IPD sequence.",
+    "remedy": "NIPD: $3.00/hr prorated to nearest minute. IPD: $3.75/hr prorated to nearest minute. IPD rate applies to ALL operating or deadheading segments on an IPD sequence (including domestic legs within the IPD sequence).",
+    "timing_constraints": "Automatic; verify on pay stubs for all segments on IPD sequences",
+    "notes": "Combined with Speaker Premium (3.J) for International segments where language skills are required. Carries into pay protection per 10.V.5.",
+    "edge_cases": ["If IPD sequence rescheduled to Domestic-only sequence: FA retains IPD pay protection at original sequence value per 10.J.10 + 10.V.5"]
+  },
+  {
+    "section": "3.J",
+    "title": "Foreign Language Speaker Premium",
+    "trigger_condition": "FA is designated Speaker filling a required position on a flight requiring their language qualification, OR is qualified and on the flight but not in a required Speaker position.",
+    "remedy": "$2.00/hr prorated to nearest minute, above all other pay and premiums, for all credit hours on segments requiring their language skills. Speaker premium applies to all deadhead hours on IPD sequences. Additive with International Pay (3.G) for International segments.",
+    "timing_constraints": "File claim if not reflected on pay stub",
+    "notes": "NOT paid during sick leave, bereavement, jury duty, or settling days (3.L). For vacation: only if 100% of PBS award credit hours include Speaker premium. Speaker displaced from their required position: claim Speaker premium for displaced hours plus potential 10.T.3.",
+    "edge_cases": ["On a charter with group bookings of foreign speakers: Speaker premium may apply even on domestic routing per the exception in 2.U"]
+  },
+  {
+    "section": "3.K",
+    "title": "Holiday Day and Incentive Day Premium",
+    "trigger_condition": "FA works on a sequence or serves Reserve Standby touching a designated Holiday Day or Company-designated Incentive Day. Includes rescheduled flying onto a holiday that did not originally touch it.",
+    "remedy": "Holiday: 100% premium over base hourly rate for hours flown (greater of scheduled or actual). Incentive Day: 50% or 100% (Company-designated). Either departure OR arrival touching the holiday = entire flight segment at premium. ADDITIVE to Red Flag pay (3.K.3). Reserve Standby on holiday: premium on standby hours if assigned flying departs non-holiday; premium on flight hours if flying departs on holiday.",
+    "timing_constraints": "File DirectConnect claim if not reflected. Holiday list is fixed in contract.",
+    "notes": "Holiday Days: Wed before Thanksgiving, Thanksgiving Day, Sunday and Monday after Thanksgiving, Dec 24/25/26, Dec 31, Jan 1. Does NOT apply to JCBA premiums (Lead, Galley, Intl, Speaker) per 3.K.4. Report No Fly on a Holiday/Incentive Day: eligible for premium (3.K.6). ODAN touching a holiday: eligible (3.K.7).",
+    "edge_cases": ["Rescheduled flying onto a Holiday Day from a sequence that did not originally touch the holiday: premium still applies (explicitly stated in 3.K.1)", "Holiday pay is above guarantee for Reserves (stated in 3.K.1)"]
+  },
+  {
+    "section": "3.M",
+    "title": "ATC Hold / Actual Out Time (Code 59)",
+    "trigger_condition": "Delay at gate awaiting pushback/powerback/taxi due to airport congestion; de-icing at gate; maintenance after leaving gate but before takeoff; deicing congestion off-gate. Captain determines readiness time.",
+    "remedy": "Flight time pay and credit begins at time Captain determines aircraft was ready for departure (not actual out time). FA receives greater of scheduled block-to-block time or delay time plus actual block time. Delay time NOT counted toward block hour limitations (Sec 11).",
+    "timing_constraints": "Based on Captain's Code 59 designation; verify on pay stub",
+    "notes": "Does NOT run concurrently with Holding Time (3.E). Creates longer effective block time that may trigger Trip Rig or Duty Rig comparisons.",
+    "edge_cases": []
+  },
+  {
+    "section": "3.N",
+    "title": "Diversion Pay",
+    "trigger_condition": "Flight diverted and aircraft NOT blocked in at a gate AND/OR passenger egress is prohibited.",
+    "remedy": "Full flight time pay and credit for all time on board during diversion. Does NOT count toward block hour calculation (Sec 11).",
+    "timing_constraints": "Automatic; verify block times on pay stub",
+    "notes": "Must meet both conditions (not blocked at gate AND passenger egress prohibited) — or either one alone where the language is disjunctive.",
+    "edge_cases": []
+  },
+  {
+    "section": "3.S",
+    "title": "Red Flag Open Time — 150% Pay, 100% Credit",
+    "trigger_condition": "FA picks up a sequence designated as Red Flag by Crew Scheduling in open time per 10.H.",
+    "remedy": "150% pay (50% premium above base pay), credited at 100%. Holiday/Incentive Day pay is ADDITIVE to Red Flag pay when triggers overlap (3.K.3).",
+    "timing_constraints": "Red Flag designation must be active at time of pickup/assignment. Verify designation has not been removed.",
+    "notes": "Red Flag designation removed when traded in TTS under certain conditions (see 10.H table). FA may bid 'Red Flag Only' in TTS to ensure pickup of Red Flag sequences only.",
+    "edge_cases": ["Red Flag + Holiday Day: both premiums apply simultaneously, making these the highest-value sequences", "If Red Flag sequence is traded or dropped in TTS/ETB: Red Flag premium removed unless Crew Scheduling redesignates"]
+  },
+  {
+    "section": "11.D.1",
+    "title": "Duty Period Minimum Guarantee (5-Hour and 3-Hour Floors)",
+    "trigger_condition": "FA flies and completes a sequence; actual flight time is less than the applicable minimum.",
+    "remedy": "Greatest of four values: (a) actual scheduled or actual flight time per leg; (b) 5-hour minimum for 1-duty-period sequence OR 3-hour minimum per duty period for multi-DP sequences; (c) Duty Rig (1:2) per 11.D.5; (d) Trip Rig (1:3.5) per 11.D.4.",
+    "timing_constraints": "Applied automatically per sequence; underpayment = file DirectConnect claim",
+    "notes": "The 5-hour minimum for single-DP sequences is the 'turn' minimum. For multi-day trips: 3-hour floor per DP, but the overall Trip Rig may produce a higher number. Minimum guarantee top-up computed as extension of last leg back to base.",
+    "edge_cases": []
+  },
+  {
+    "section": "11.D.3",
+    "title": "Call Out / Report No Fly",
+    "trigger_condition": "FA reports to the airport for a specific flight assignment but does NO flying.",
+    "remedy": "Trip origination: greater of (a) On-Duty Time pay from report until released to legal rest OR (b) 3 hours flight time pay. Mid-sequence: greater of (a) On-Duty Time pay and credit OR Trip Away from Base (TAFB) whichever greater OR (b) 3 hours flight time pay AND credit.",
+    "timing_constraints": "File DirectConnect claim. Distinguish from 10.J.11.b (pre-report cancellation = 3hr pay without reporting).",
+    "notes": "Does NOT apply if FA doesn't fly due to own incapacity or if displaced by supervisor/instructor. Boarding pay (3.D) and Holding Time (3.E) may ALSO apply if FA boarded and/or had extended ground time before no-fly determination.",
+    "edge_cases": ["Report No Fly on Holiday/Incentive Day: eligible for the premium per 3.K.6"]
+  },
+  {
+    "section": "11.J.2",
+    "title": "Domestic Layover Rest Violation — Continuous On-Duty Status",
+    "trigger_condition": "FA does not receive the minimum 10-hour overnight layover rest (release to report).",
+    "remedy": "FA considered continuously on duty — all Duty Rigs and premiums apply to the continuation of the sequence. FA may claim sick time for remainder if unable to continue.",
+    "timing_constraints": "Inherent during the sequence; claim Duty Rig on the duty period encompassing the rest violation",
+    "notes": "The 10-hour minimum scheduled layover rest cannot be reduced. In actual operations: 8 hours 'behind the door' minimum. If even 8 hours cannot be met: crew contacts Crew Scheduling for rescheduling.",
+    "edge_cases": []
+  },
+  {
+    "section": "11.O.1.a",
+    "title": "Voluntary Extension (VE) — 200%/300% Pay",
+    "trigger_condition": "FA voluntarily agrees electronically to remain on duty past maximum duty limitations (11.F) due to delay + projected flight time exceeding duty max.",
+    "remedy": "Up to 3 hours over duty max: 200% pay, 100% credit for entire duty period. Over 3 hours up to 4 hours maximum: 300% pay, 100% credit for entire duty period (instead of 200%). FA receives premium even if duty limits not actually exceeded once agreement is made.",
+    "timing_constraints": "Agreement via electronic offer/response. Once accepted electronically: may NOT be rescinded.",
+    "notes": "Company must offer VE electronically to each crewmember individually. Failure to agree does NOT affect other pay protections. Double-up sequences: calculation from report time of first sequence to 15min after block-in of second sequence.",
+    "edge_cases": []
+  },
+  {
+    "section": "11.P",
+    "title": "All-Nighter Flagstop Cancellation — Published Value Pay",
+    "trigger_condition": "Crew scheduled to fly an all-nighter trip that is cancelled and consolidated into another all-nighter due to operational necessity.",
+    "remedy": "Pay and credit for published value of the CANCELLED trip (in addition to flying the consolidated trip).",
+    "timing_constraints": "File DirectConnect claim",
+    "notes": "Companion to 11.Q which covers the reverse scenario (flagstops incorporated into an all-nighter).",
+    "edge_cases": []
+  },
+  {
+    "section": "11.Q",
+    "title": "Flagstops Incorporated Into All-Nighter",
+    "trigger_condition": "One or more flagstops incorporated into a crew's all-nighter trip due to operational necessity.",
+    "remedy": "Greater of published value of original sequence OR actual value as flown, PLUS 5 hours pay and credit for the resulting flagstop(s).",
+    "timing_constraints": "File DirectConnect claim",
+    "notes": "The 5 hours is ADDITIVE to the original/actual comparison. Strong remedy for operational additions to all-nighter sequences.",
+    "edge_cases": []
+  },
+  {
+    "section": "12.B.2.d / 12.D",
+    "title": "Reserve — Actual Operations Extension Into Golden Day (>1 Hour)",
+    "trigger_condition": "Actual operations cause Reserve's duty period to extend MORE THAN 1 hour into their Golden Day.",
+    "remedy": "Hours on/after 0000 of Golden Day: pay, no credit. Options: Reserve and Company mutually agree to reinstate a Golden Day on a different day in the bid period, OR day(s) off placed at end of current Reserve days off. Reserve released from all duty for remainder of return day. If no available days OR Reserve fails to call within 48 hours: pay no credit equal to value of a Reserve day.",
+    "timing_constraints": "Reserve must contact Crew Scheduling within 48 HOURS of assignment into the Golden Day to arrange reinstatement.",
+    "notes": "Extension of 1 hour or LESS: day not restored, hours paid as pay no credit, no reinstatement options. Extension MORE than 1 hour: reinstatement options and 48-hour window apply.",
+    "edge_cases": []
+  },
+  {
+    "section": "12.D.3",
+    "title": "Reserve — Lost Golden Day Monetary Compensation",
+    "trigger_condition": "Reserve worked into Golden Day per 12.B.2.d or was assigned on Flex Day that extended into Golden Day AND: (a) fails to call within 48 hours for reinstatement, OR (b) has no remaining availability days in bid period.",
+    "remedy": "Pay no credit equal to the value of a Reserve day: monthly minimum guarantee (75) ÷ number of originally scheduled days in Reserve line that are NOT Golden or Flex Days.",
+    "timing_constraints": "Triggered by 48-hour window expiration or confirmed lack of available reinstatement days",
+    "notes": "This is a monetary substitute for a lost rest day — the daily rate varies based on Reserve line composition.",
+    "edge_cases": []
+  },
+  {
+    "section": "12.F.9.a",
+    "title": "Reserve Standby Pay — No Flight Assigned",
+    "trigger_condition": "Reserve serves Standby duty at airport and is NOT assigned a flight during the shift.",
+    "remedy": "4-hour shift: 3hr 30min pay and credit. 6-hour shift: 5hr 15min pay and credit. 8-hour shift: 7 hours pay and credit.",
+    "timing_constraints": "Automatic upon completion of Standby shift without assignment",
+    "notes": "Reserve released at end of shift to begin crew base rest. Reserve may request to extend shift to 6 or 8 hours with Crew Scheduling approval — extended time paid at same rates. If Standby not released at end of shift due to boarding duty that started before shift end: 12.F.9.d applies (1:1 for overrun minutes).",
+    "edge_cases": []
+  },
+  {
+    "section": "12.F.9.b",
+    "title": "Reserve Standby — Sequence Departing Within Standby Shift",
+    "trigger_condition": "Standby Reserve assigned sequence departing within their Standby shift.",
+    "remedy": "Full sequence value (scheduled or actual, whichever greater) PLUS Standby Duty Rig (1:1.25) for time between Standby report and sequence report time (based on departure time AT TIME OF ASSIGNMENT).",
+    "timing_constraints": "Automatic; verify both standby duty rig and sequence value on pay stub",
+    "notes": "Standby Duty Rig (1:1.25) is more favorable than standard Duty Rig (1:2). Departure time 'at time of assignment' governs — not original scheduled departure — critical in IROPS when departure times shift.",
+    "edge_cases": ["If departure was originally before Standby report time but reassigned during Standby: the reassignment departure time triggers the calculation", "If Standby is assigned a sequence departing OUTSIDE their shift: 12.F.9.c applies (gap time also compensated at 1:1.25)"]
+  },
+  {
+    "section": "12.F.9.c",
+    "title": "Reserve Standby — Sequence Departing Outside Standby Shift",
+    "trigger_condition": "Standby Reserve assigned sequence departing AFTER the end of their Standby shift.",
+    "remedy": "Full sequence value (scheduled or actual, whichever greater) PLUS Standby Duty Rig (1:1.25) for time on Standby AND for additional time up to the report time of the sequence.",
+    "timing_constraints": "Automatic; verify entire gap is compensated at 1:1.25 on pay stub",
+    "notes": "Sequence report = 1 hour before departure (DOM/NIPD) or 1:15 (IPD). The 1:1.25 rate covers the entire period from Standby report through sequence report.",
+    "edge_cases": []
+  },
+  {
+    "section": "12.F.9.d",
+    "title": "Reserve Standby — Boarding Duty Overrun Beyond Shift End",
+    "trigger_condition": "Standby assigned boarding duty before the end of their Standby shift; boarding duty continues beyond the end of the Standby shift.",
+    "remedy": "1 minute of pay and credit for each 1 minute of duty beyond scheduled Standby shift end (1:1 ratio). Standby shift pay itself is not reduced.",
+    "timing_constraints": "Automatic for post-shift-end minutes",
+    "notes": "The 1:1 overrun rate is less favorable than the 1:1.25 pre-shift-end Standby Duty Rig. Standby may accept or decline the extended boarding.",
+    "edge_cases": []
+  },
+  {
+    "section": "12.M.2",
+    "title": "Reserve Reports But Does Not Fly — Call Out Pay",
+    "trigger_condition": "Reserve reports on time to airport for assigned sequence but flight departs WITHOUT the Reserve.",
+    "remedy": "Reserve required to remain available same day only. Crew Scheduling options: (a) Standby duty ≤ 6 hours for remainder of RAP; (b) Standby duty ≤ 6 hours if no RAP originally assigned; (c) Release with applicable Call Out Pay per 11.D.3.",
+    "timing_constraints": "Reserve's original report time used for applicable maximum duty day calculation",
+    "notes": "Pay and Credit for any Standby or further assignments per 12.F.9. Reserve maintains Reserve obligation for remaining Reserve Day(s) of original sequence.",
+    "edge_cases": []
+  },
+  {
+    "section": "12.N",
+    "title": "Reserve Calling Out of Time — Release from Reserve Obligation",
+    "trigger_condition": "Reserve's credited hours reach (monthly maximum MINUS the value of a minimum day).",
+    "remedy": "Reserve released from all Reserve obligation for remainder of month. Cannot be required to accept assignment that would exceed monthly maximum.",
+    "timing_constraints": "Automatic once threshold met; Reserve should notify Crew Scheduling",
+    "notes": "Monthly max consistent with Lineholder monthly max in base. Aggressive Reserve hours above 40/month do NOT count toward calling-out-of-time calculation (12.K.4.b). Reserve guarantee (75hr) not reduced by calling out of time. If Company assigns past monthly max without FA consent: file 10.T.3 claim.",
+    "edge_cases": []
+  },
+  {
+    "section": "12.O.6",
+    "title": "Lineholder Involuntary Off-Day Assignment — Twice Per Month Maximum",
+    "trigger_condition": "Lineholder assigned a trip on their day off (involuntary assignment per 12.O).",
+    "remedy": "Normal sequence pay for involuntary assignment. Lineholder may NOT be involuntarily assigned more than TWICE per bid period. May refuse a third involuntary assignment. Cannot be involuntarily assigned on vacation or adjacent to vacation days.",
+    "timing_constraints": "Track involuntary assignment count per month",
+    "notes": "If over-projected as a result of involuntary assignment: FA options per 10.O.3 (drop later trip, split sequence, or fly over max and be paid excess). Involuntary assignment process follows strict priority order of 12.O (Reserves first, then Lineholders).",
+    "edge_cases": []
+  },
+  {
+    "section": "16.A",
+    "title": "Deadhead Pay and Credit — Full Pay With All Premiums",
+    "trigger_condition": "FA required by Company to deadhead (by air or surface) between two points for any Company purpose.",
+    "remedy": "Full pay AND credit: greater of scheduled block time or actual flight time. ALL premiums apply to deadhead (International, Speaker, Lead, Galley as applicable).",
+    "timing_constraints": "Automatic; verify premiums on deadhead segments on pay stub",
+    "notes": "Deadhead pay = same rate as live flying. Commonly missed: International and Speaker premiums on deadhead segments. FA who elects to waive deadhead per 16.G or 16.H is paid AS IF they flew the original scheduled deadhead including premiums and Duty Rig.",
+    "edge_cases": ["Positive space authorization on deadhead: FA has a seat even on oversold flights (2.OO). If removed from deadhead flight due to overbooking: claim for duty time and pay for the delay plus any missed sequence pay protection"]
+  },
+  {
+    "section": "16.I.1",
+    "title": "Surface Deadhead — Pay and Credit",
+    "trigger_condition": "FA required by Company to surface deadhead between airports without intervening layover, OR hotel to airport >50 AAA miles, OR flies into one airport and out of another.",
+    "remedy": "Pay and credit: AAA miles between airports ÷ 40. All premiums and Per Diem apply. In no case credited less than a pilot for the same airport combination. Fixed times apply per Ground Transportation Chart (16.I.2) for common city pairs.",
+    "timing_constraints": "FA may call Crew Tracking to revise release time if actual exceeds scheduled",
+    "notes": "Treated as flight deadhead for scheduling purposes. Fixed chart city pairs include: LGA/JFK/EWR (1:30-2:00), MDW/ORD (2:00), LAX-area (1:00-2:15), DCA/BWI/IAD (1:15-1:45), SFO/OAK/SJC (1:00-2:00), DFW/DAL (1:00), MIA/FLL (1:45), TPA/PIE (1:00), FLL/PBI (1:00), SEA/BFI (:45).",
+    "edge_cases": []
+  }
+]
