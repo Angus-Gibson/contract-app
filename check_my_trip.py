@@ -124,7 +124,11 @@ QUESTIONS = {
             "(i.e., did it carry over credit/value from the prior bid month)?"
         ),
         "type": "yn",
-        "depends_on": {"lll_swap": "yes", "lll_company_approved": "yes"},
+        "depends_on": {
+            "lll_swap": "yes",
+            "lll_company_approved": "yes",
+            "lll_swap_role": "I gave AWAY my last live leg (another FA flew it for me)",
+        },
     },
     "held_carryover_at_conversion": {
         "text": (
@@ -140,12 +144,12 @@ QUESTIONS = {
     },
     "post_swap_company_action": {
         "text": (
-            "After the LLL Swap was completed, did the Company take any separate "
-            "scheduling action that disrupted your remaining flying "
+            "After the LLL Swap was completed (or attempted), did the Company take any "
+            "separate scheduling action that disrupted your remaining flying "
             "(e.g., cancel, reroute, or reassign a different sequence)?"
         ),
         "type": "yn",
-        "depends_on": {"lll_swap": "yes", "lll_company_approved": "yes"},
+        "depends_on": {"lll_swap": "yes"},
     },
     "has_premiums": {
         "text": (
@@ -216,7 +220,8 @@ composition. The correct pre-swap value will be confirmed in Pass 3.
 
 NOTE — do NOT select these IDs; they are injected automatically by the application \
 when lll_swap is selected: "lll_company_approved", "lll_swap_role", "is_reserve", \
-"lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status", \
+"lll_was_deadhead", "post_swap_company_action", "lll_highest_value_leg", \
+"gave_away_reserve_status", "gave_away_reserve_day_type", \
 "gave_away_reserve_remaining_days", "is_changeover_sequence", \
 "held_carryover_at_conversion". The only ID you may select that is also \
 auto-injected is "has_premiums" — selecting it is harmless as the application \
@@ -278,6 +283,14 @@ RULES:
 by the triage flagged-provisions list OR by the follow-up answers (e.g., \
 LLL Swap confirmed yes in answers triggers 10.P analysis even if no provision \
 was formally flagged by triage).
+- Reporting threshold (§10.T.3): if had_reported is in the follow-up answers, \
+use it to gate all 10.T.3 claims: if had_reported = yes, the FA was post-report \
+at the time of the disruption — §10.T.3 eligibility threshold is confirmed; if \
+had_reported = no, the disruption was pre-report — suppress §10.T.3 and analyze \
+under §10.J.2/§10.J.10 instead. Apply this gate to every 10.T.3 claim regardless \
+of LLL Swap status. If had_reported was not asked or not answered, include any \
+10.T.3 claim and note "Verify: was the FA post-report (signed in at the airport) \
+at the time of the disruption? If pre-report, §10.T.3 does not apply."
 - If LLL Swap is confirmed (yes), first check approval: if lll_company_approved = no, \
 do NOT apply the 10.P.4 framework — the swap was not Company-authorized. Treat the \
 scheduling action as a Company-initiated change and analyze under the applicable \
@@ -287,7 +300,11 @@ analyzed as Company-initiated scheduling change." Disregard any PROVISIONAL sequ
 10.T.3 150% calculation, use the original published sequence value BEFORE the \
 attempted swap — do not use post-disruption actual flying value, as the \
 attempted-but-unapproved swap may itself be the Company error triggering 10.T.3. \
-If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
+If post_swap_company_action = yes, a SECOND independent Company action also occurred \
+after the failed swap attempt — generate standalone claims for each confirmed \
+independent violation; both the attempted swap (as a Company-initiated scheduling \
+error) and the second action may separately trigger §10.T.3 if §10.T.3 conditions \
+are met for each event. If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
 If lll_company_approved was not answered, treat as unapproved (Company-initiated \
 framework) and flag in NOTES: "LLL Swap approval status not confirmed — applying \
 Company-initiated framework; verify approval status before filing."
@@ -348,18 +365,28 @@ disruption), the Reserve qualifies for 10.L.1 — full pay+credit, no fly obliga
 if gave_away_reserve_remaining_days = yes (remaining Reserve days existed), 10.L.4 \
 applies instead — pay protected for cancelled portions, FA must still fly uncancelled \
 portions. Cite the applicable section (10.L.1 or 10.L.4) in SECTION and CLAIM. \
-If post_swap_company_action = yes (a separate Company action disrupted the FA's \
-remaining flying after swap completion), also analyze 10.T.3 for any post-report \
-Company error — this claim is independent of the LLL swap framework and not subject \
-to 10.P suppression. Generate a standalone 10.T.3 claim if triggered. \
-If lll_was_deadhead = yes, note in NOTES: "Deadhead-to-live conversion confirmed — \
-giving-away FA was released from the live segment; verify whether the arrangement \
-altered the FA's sequence composition for TAFB calculation." \
+Apply a causal test using post_swap_company_action: (a) if post_swap_company_action \
+= yes (a separate Company action disrupted the FA's remaining flying after swap \
+completion), analyze 10.T.3 for any post-report Company error — this claim is \
+independent of the LLL swap framework and not subject to 10.P suppression; generate \
+a standalone 10.T.3 claim if triggered and note "10.T.3 survives — caused by \
+independent Company action after swap completion"; (b) if post_swap_company_action \
+= no, no standalone post-swap 10.T.3 claim is warranted under the gave-away \
+framework; (c) if post_swap_company_action was not answered, include a 10.T.3 claim \
+and note "Causal determination required — confirm whether a separate Company action \
+disrupted this FA's flying after swap completion." \
+If lll_was_deadhead = yes, a deadhead-to-live conversion confirms the FA's sequence \
+composition changed (the deadhead segment was replaced by live flying) — treat this \
+as satisfying the "swap changed sequence composition" condition below and generate \
+the standalone TAFB rig claim (§2.AAA/11.D.4). Note in NOTES: "Deadhead-to-live \
+conversion confirmed — giving-away FA was released from the live segment; TAFB \
+recalculation required against original sequence." \
 Additionally, flag the following rig provisions — \
 these require recalculation based on the swap: (a) TAFB Rig: if the swap \
-changed sequence composition, recalculate effective TAFB against the original \
-sequence; (b) Duty Rig: duty time for the giving-away FA continues per the \
-original sequence release time, not the LLL leg's actual release; (c) Sit Rig: \
+changed sequence composition (including when lll_was_deadhead = yes, which \
+definitively satisfies this condition), recalculate effective TAFB against the \
+original sequence; (b) Duty Rig: duty time for the giving-away FA continues per \
+the original sequence release time, not the LLL leg's actual release; (c) Sit Rig: \
 if the swap altered segment timing within a duty period, recalculate sit rig \
 based on actual sit times after the swap.
 - 10.T.3 suppression scope (swapped-onto FA only): §10.P.4 suppresses pay and \
@@ -453,7 +480,7 @@ def run_triage(
     print("\n[1/3] Scanning provisions (Haiku)...", flush=True)
     try:
         response = client.messages.create(
-            model="claude-haiku-4-5",
+            model="claude-haiku-4-5-20251001",
             max_tokens=2048,
             system=TRIAGE_SYSTEM,
             messages=[{
@@ -673,6 +700,8 @@ def main():
         for p in triage["flagged_provisions"]
     ):
         selected.append("has_premiums")
+    if "has_premiums" in selected and "premium_types" not in selected:
+        selected.append("premium_types")
     answers = ask_questions(selected, detecting=not bool(triage["flagged_provisions"]))
 
     if not triage["flagged_provisions"] and answers.get("lll_swap") != "yes":
