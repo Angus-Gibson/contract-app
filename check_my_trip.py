@@ -61,7 +61,7 @@ QUESTIONS = {
     "is_reserve": {
         "text": "Are you a Reserve (as opposed to a Lineholder)?",
         "type": "yn",
-        "depends_on": {"lll_swap": "yes"},
+        "depends_on": {"lll_swap_role": "I swapped ONTO another FA's last live leg (I flew the leg)"},
     },
     "lll_highest_value_leg": {
         "text": (
@@ -138,7 +138,10 @@ TRIAGE_SCHEMA = {
         },
         "questions_to_ask": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": {
+                "type": "string",
+                "enum": ["last_sequence", "had_reported", "split_or_replaced", "lll_swap", "has_premiums"],
+            },
         },
         "summary": {"type": "string"},
     },
@@ -376,9 +379,9 @@ def stream_final_output(
                 if event.content_block.type == "thinking":
                     in_thinking = True
                     print("[Confirming triggered provisions...]\n", flush=True)
-                elif event.content_block.type == "text" and in_thinking:
-                    in_thinking = False
-                    print()
+            elif event.type == "content_block_stop" and in_thinking:
+                in_thinking = False
+                print()
             elif event.type == "content_block_delta":
                 if event.delta.type == "text_delta":
                     print(event.delta.text, end="", flush=True)
