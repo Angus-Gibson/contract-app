@@ -116,7 +116,10 @@ or "swap" — select this regardless of which provisions are flagged
 is flagged
 
 Return only IDs that are genuinely needed. If all flagged provisions are "definite" \
-and no ambiguity exists, return an empty list.\
+and no ambiguity exists, return an empty list.
+
+NOTE — do NOT select these IDs; they are injected automatically by the application \
+when lll_swap is selected: "lll_swap_role", "is_reserve", "lll_highest_value_leg".\
 """
 
 TRIAGE_SCHEMA = {
@@ -435,6 +438,8 @@ def main():
             if qid not in selected:
                 selected.insert(idx, qid)
                 idx += 1
+        assert all(q in selected for q in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]), \
+            "Injection block integrity failure: LLL sub-questions missing from selected"
     answers = ask_questions(selected, detecting=not bool(triage["flagged_provisions"]))
 
     if not triage["flagged_provisions"] and answers.get("lll_swap") != "yes":
