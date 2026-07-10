@@ -40,8 +40,8 @@ QUESTIONS = {
         ),
         "type": "choice",
         "choices": [
-            "Split onto modified version of same sequence (10.L.1)",
-            "Replaced with entirely different flying (10.L.3)",
+            "Split onto modified version of same sequence",
+            "Replaced with entirely different flying",
         ],
         "depends_on": {"last_sequence": "yes"},
     },
@@ -56,7 +56,7 @@ QUESTIONS = {
             "I swapped ONTO another FA's last live leg (I flew the leg)",
             "I gave AWAY my last live leg (another FA flew it for me)",
         ],
-        "depends_on": {"lll_swap": "yes"},
+        "depends_on": {"lll_swap": "yes", "lll_company_approved": "yes"},
     },
     "lll_company_approved": {
         "text": (
@@ -82,7 +82,7 @@ QUESTIONS = {
             "(repositioning flight) that converted to live flying?"
         ),
         "type": "yn",
-        "depends_on": {"lll_swap": "yes"},
+        "depends_on": {"lll_swap": "yes", "lll_company_approved": "yes"},
     },
     "lll_highest_value_leg": {
         "text": (
@@ -101,13 +101,30 @@ QUESTIONS = {
         "type": "yn",
         "depends_on": {"lll_swap_role": "I gave AWAY my last live leg (another FA flew it for me)"},
     },
+    "gave_away_reserve_remaining_days": {
+        "text": "Do you have any remaining Reserve days in this bid period?",
+        "type": "yn",
+        "depends_on": {"gave_away_reserve_status": "yes"},
+    },
     "is_changeover_sequence": {
         "text": (
             "Was this a changeover sequence "
             "(i.e., did it carry over credit/value from the prior bid month)?"
         ),
         "type": "yn",
-        "depends_on": {"lll_swap": "yes"},
+        "depends_on": {"lll_swap": "yes", "lll_company_approved": "yes"},
+    },
+    "held_carryover_at_conversion": {
+        "text": (
+            "Were you holding (awarded) this sequence as a carryover at the time it "
+            "converted to a changeover sequence, or did you pick it up after conversion?"
+        ),
+        "type": "choice",
+        "choices": [
+            "I was holding it as a carryover at the time of conversion",
+            "I picked it up after it was already a changeover sequence",
+        ],
+        "depends_on": {"is_changeover_sequence": "yes"},
     },
     "has_premiums": {
         "text": (
@@ -130,7 +147,9 @@ QUESTION_ORDER = [
     "lll_was_deadhead",
     "lll_highest_value_leg",
     "gave_away_reserve_status",
+    "gave_away_reserve_remaining_days",
     "is_changeover_sequence",
+    "held_carryover_at_conversion",
     "has_premiums",
 ]
 
@@ -237,9 +256,12 @@ suppress any pay or pay-protection claim that would otherwise arise, and note \
 Reserve status does not create any pay entitlement for LLL Swap flying (10.P.4). \
 Check is_reserve: if "Reserve — on a day off (RDO)", explicitly cite §10.P edge \
 case 1 in NOTES: "Reserve on day off confirmed — 10.P.4 applies identically; no \
-pay, no pay protection." If "Reserve — on an active Reserve duty day", note §10.P.4 \
-applies; no additional edge case citation needed. If "Lineholder", standard 10.P.4 \
-applies. If lll_was_deadhead = yes, flag in NOTES: "Deadhead-to-live conversion \
+pay, no pay protection." If "Reserve — on an active Reserve duty day", note §10.P.4 bars \
+additional LLL swap pay — but pre-swap Reserve duty day pay owed independently of \
+the swap may survive §10.P.4. Flag in NOTES: "Active Reserve duty day confirmed — \
+pre-swap Reserve guarantee/duty pay is not extinguished by 10.P.4; verify with \
+Local whether accrued duty pay remains owed. LLL swap pay itself: not owed \
+(10.P.4 applies)." If "Lineholder", standard 10.P.4 applies. If lll_was_deadhead = yes, flag in NOTES: "Deadhead-to-live conversion \
 confirmed — swapping FA was required to work the live segment; verify crew legality \
 for the live flight. 10.P.4 still applies; no pay for the converted live leg." \
 Additionally, note that §10.M.2 (Company-initiated split pay protection) and \
@@ -257,18 +279,25 @@ in full. SEQUENCE VALUE ANCHOR: all pay calculations (10.J.10, 10.K, 10.L.1, \
 BEFORE the swap — never the post-swap composition. If the LLL was the \
 highest-value leg (confirmed yes), flag this explicitly: excluding it would \
 reduce the sequence value and therefore the 150% base — use pre-swap value. \
-If is_changeover_sequence = yes, apply a DOUBLE ANCHOR: (1) use the carryover \
-value from the prior bid month as the sequence base — not the published \
-changeover-sequence value; (2) then apply the pre-swap anchor — never the \
-post-swap composition. Note in REMEDY: "DOUBLE ANCHOR: (1) carryover value from \
-prior bid month; (2) pre-swap value — not post-swap composition." \
+If is_changeover_sequence = yes, check held_carryover_at_conversion: if the FA \
+was holding the sequence as a carryover at the time of conversion, apply a DOUBLE \
+ANCHOR: (1) use the carryover value from the prior bid month as the sequence base \
+— not the published changeover-sequence value; (2) then apply the pre-swap anchor \
+— never the post-swap composition. Note in REMEDY: "DOUBLE ANCHOR: (1) carryover \
+value from prior bid month (§10.J.12 — FA held carryover at conversion); (2) \
+pre-swap value — not post-swap composition." If the FA picked it up after \
+conversion, use only the single pre-swap anchor — the published changeover-sequence \
+value is the base; the prior-bid-month carryover value does not apply. \
 If the FA has not provided the original sequence value, include in REMEDY: \
 "TBD — provide original published sequence value (pre-swap)." Note "10.P — \
 original sequence pay structure retained; sequence value = pre-swap original" \
-in each affected claim. If gave_away_reserve_status = yes (FA is a Reserve), \
-check 10.L.6 eligibility before applying 10.L.1: a Reserve qualifies for 10.L.1 \
-(full pay+credit) only if they have no remaining Reserve days in the bid period; \
-otherwise 10.L.4 may apply instead. Flag in NOTES if 10.L.6 eligibility is unclear. \
+in each affected claim. If gave_away_reserve_status = yes (FA is a Reserve), apply 10.L.6 eligibility \
+using gave_away_reserve_remaining_days: if gave_away_reserve_remaining_days = no \
+(no remaining Reserve days), the Reserve qualifies for 10.L.1 — full pay+credit, \
+no fly obligation; if gave_away_reserve_remaining_days = yes (remaining Reserve days \
+exist), 10.L.4 applies instead — pay protected for cancelled portions, FA must still \
+fly uncancelled portions. Cite the applicable section (10.L.1 or 10.L.4) in the \
+SECTION and CLAIM fields accordingly. \
 If lll_was_deadhead = yes, note in NOTES: "Deadhead-to-live conversion confirmed — \
 giving-away FA was released from the live segment; verify whether the arrangement \
 altered the FA's sequence composition for TAFB calculation." \
@@ -347,18 +376,21 @@ def run_triage(
 ) -> dict:
     """Single Haiku call: returns flagged provisions + question IDs to ask."""
     print("\n[1/3] Scanning provisions (Haiku)...", flush=True)
-    response = client.messages.create(
-        model="claude-haiku-4-5",
-        max_tokens=2048,
-        system=TRIAGE_SYSTEM,
-        messages=[{
-            "role": "user",
-            "content": f"CBA PROVISIONS:\n{provisions_json}\n\nSITUATION:\n{situation}",
-        }],
-        output_config={
-            "format": {"type": "json_schema", "schema": TRIAGE_SCHEMA}
-        },
-    )
+    try:
+        response = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=2048,
+            system=TRIAGE_SYSTEM,
+            messages=[{
+                "role": "user",
+                "content": f"CBA PROVISIONS:\n{provisions_json}\n\nSITUATION:\n{situation}",
+            }],
+            output_config={
+                "format": {"type": "json_schema", "schema": TRIAGE_SCHEMA}
+            },
+        )
+    except anthropic.APIError as e:
+        sys.exit(f"ERROR: Triage API call failed — {e}")
     text = next((b.text for b in response.content if b.type == "text"), None)
     if text is None:
         sys.exit("ERROR: Triage response contained no text block.")
@@ -532,7 +564,8 @@ def main():
         for qid in [
             "lll_company_approved", "lll_swap_role", "is_reserve",
             "lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status",
-            "is_changeover_sequence",
+            "gave_away_reserve_remaining_days", "is_changeover_sequence",
+            "held_carryover_at_conversion",
         ]:
             if qid not in selected:
                 selected.insert(idx, qid)
@@ -540,7 +573,8 @@ def main():
         required_lll = [
             "lll_company_approved", "lll_swap_role", "is_reserve",
             "lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status",
-            "is_changeover_sequence",
+            "gave_away_reserve_remaining_days", "is_changeover_sequence",
+            "held_carryover_at_conversion",
         ]
         if not all(q in selected for q in required_lll):
             sys.exit("ERROR: Injection block integrity failure — LLL sub-questions missing from selected list.")
