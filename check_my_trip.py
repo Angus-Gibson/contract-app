@@ -226,19 +226,20 @@ def get_situation() -> str:
     print("number, dates, what happened, actual vs. scheduled")
     print("times if known, and Lineholder or Reserve status.")
     print()
-    print("Press Enter twice when done:")
+    print("When finished, enter a blank line to submit:")
     print()
 
-    lines, blank = [], 0
-    while blank < 1:
+    lines = []
+    while True:
         try:
             line = input()
         except EOFError:
             break
         if line == "":
-            blank += 1
+            if lines:
+                break
+            print("  (No input yet — please describe your situation first.)")
         else:
-            blank = 0
             lines.append(line)
 
     situation = "\n".join(lines).strip()
@@ -265,7 +266,10 @@ def run_triage(
         },
     )
     text = next(b.text for b in response.content if b.type == "text")
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        sys.exit(f"ERROR: Triage returned malformed JSON — {e}\nRaw response:\n{text}")
 
 
 def ask_questions(selected_ids: list, answers: dict | None = None, detecting: bool = False) -> dict:
@@ -416,6 +420,7 @@ def main():
     else:
         print("\n  No provisions formally flagged by keyword scan.")
         print("  LLL swap keyword detected — continuing to follow-up questions.")
+    print(f"  {triage['summary']}")
 
     # Pass 2 — follow-up questions (local, no API call)
     # lll_swap_role is always needed when lll_swap is selected; inject it here
@@ -428,6 +433,10 @@ def main():
                 selected.insert(idx, qid)
                 idx += 1
     answers = ask_questions(selected, detecting=not bool(triage["flagged_provisions"]))
+
+    if not triage["flagged_provisions"] and answers.get("lll_swap") != "yes":
+        print(f"\nNo provisions triggered.\n{triage['summary']}")
+        return
 
     # Pass 3 — Opus final output (adaptive thinking, streaming)
     stream_final_output(client, situation, provisions_json, triage, answers)
