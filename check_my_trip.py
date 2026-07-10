@@ -268,12 +268,15 @@ def run_triage(
     return json.loads(text)
 
 
-def ask_questions(selected_ids: list, answers: dict | None = None) -> dict:
+def ask_questions(selected_ids: list, answers: dict | None = None, detecting: bool = False) -> dict:
     """Walk QUESTION_ORDER, ask only IDs returned by triage, honour depends_on."""
     if answers is None:
         answers = {}
 
-    print("\n[2/3] Follow-up questions")
+    if detecting:
+        print("\n[2/3] Investigating potential claim")
+    else:
+        print("\n[2/3] Follow-up questions")
     print("-" * 60)
 
     asked = 0
@@ -424,7 +427,7 @@ def main():
             if qid not in selected:
                 selected.insert(idx, qid)
                 idx += 1
-    answers = ask_questions(selected)
+    answers = ask_questions(selected, detecting=not bool(triage["flagged_provisions"]))
 
     # Pass 3 — Opus final output (adaptive thinking, streaming)
     stream_final_output(client, situation, provisions_json, triage, answers)
