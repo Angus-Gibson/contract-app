@@ -58,20 +58,56 @@ QUESTIONS = {
         ],
         "depends_on": {"lll_swap": "yes"},
     },
-    "is_reserve": {
-        "text": "Are you a Reserve (as opposed to a Lineholder)?",
+    "lll_company_approved": {
+        "text": (
+            "Was the LLL Swap electronically submitted and approved by the Company "
+            "(within the required 15-minute window)?"
+        ),
         "type": "yn",
+        "depends_on": {"lll_swap": "yes"},
+    },
+    "is_reserve": {
+        "text": "What is your status on this day?",
+        "type": "choice",
+        "choices": [
+            "Lineholder",
+            "Reserve — on a day off (RDO)",
+            "Reserve — on an active Reserve duty day",
+        ],
         "depends_on": {"lll_swap_role": "I swapped ONTO another FA's last live leg (I flew the leg)"},
+    },
+    "lll_was_deadhead": {
+        "text": (
+            "Was the Last Live Leg originally scheduled as a deadhead "
+            "(repositioning flight) that converted to live flying?"
+        ),
+        "type": "yn",
+        "depends_on": {"lll_swap": "yes"},
     },
     "lll_highest_value_leg": {
         "text": (
             "Was the leg you gave away the highest-value leg in your sequence "
-            "(i.e., would removing it reduce your sequence's total value)?"
+            "(i.e., would removing it reduce your sequence's total value)? "
+            "Note: your answer also affects any 10.T.3 150% error-pay base — "
+            "the LLL's value is part of the pre-swap sequence value that anchors that multiplier."
         ),
         "type": "yn",
         "depends_on": {
             "lll_swap_role": "I gave AWAY my last live leg (another FA flew it for me)"
         },
+    },
+    "gave_away_reserve_status": {
+        "text": "Are you a Reserve (as opposed to a Lineholder)?",
+        "type": "yn",
+        "depends_on": {"lll_swap_role": "I gave AWAY my last live leg (another FA flew it for me)"},
+    },
+    "is_changeover_sequence": {
+        "text": (
+            "Was this a changeover sequence "
+            "(i.e., did it carry over credit/value from the prior bid month)?"
+        ),
+        "type": "yn",
+        "depends_on": {"lll_swap": "yes"},
     },
     "has_premiums": {
         "text": (
@@ -88,9 +124,13 @@ QUESTION_ORDER = [
     "had_reported",
     "split_or_replaced",
     "lll_swap",
+    "lll_company_approved",
     "lll_swap_role",
     "is_reserve",
+    "lll_was_deadhead",
     "lll_highest_value_leg",
+    "gave_away_reserve_status",
+    "is_changeover_sequence",
     "has_premiums",
 ]
 
@@ -182,35 +222,57 @@ RULES:
 by the triage flagged-provisions list OR by the follow-up answers (e.g., \
 LLL Swap confirmed yes in answers triggers 10.P analysis even if no provision \
 was formally flagged by triage).
-- If LLL Swap is confirmed (yes), apply 10.P.4 based on the FA's role:
+- If LLL Swap is confirmed (yes), first check approval: if lll_company_approved = no, \
+do NOT apply the 10.P.4 framework — the swap was not Company-authorized. Treat the \
+scheduling action as a Company-initiated change and analyze under the applicable \
+sections (10.T.3, 10.J, 10.K, 10.L, 10.M) as if the LLL swap never occurred. Note \
+in each claim: "LLL Swap approval not confirmed — 10.P.4 framework does not apply; \
+analyzed as Company-initiated scheduling change." If lll_company_approved = yes (or \
+not answered), proceed with the role-based 10.P.4 analysis below.
+- If LLL Swap is confirmed and approved, apply 10.P.4 based on the FA's role:
   * SWAPPED ONTO the LLL: this FA receives NO pay for any flights flown under \
 the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
 suppress any pay or pay-protection claim that would otherwise arise, and note \
 "10.P.4 — LLL Swap recipient: no pay, no pay protection" in each affected claim. \
-This applies equally if the FA is a Reserve on a day off — Reserve status does \
-not create any pay entitlement for LLL Swap flying (10.P.4). If the FA confirmed \
-Reserve status (is_reserve = yes), explicitly cite §10.P edge case 1 in NOTES: \
-"Reserve on day off confirmed — 10.P.4 applies identically; no pay, no pay \
-protection." Additionally, \
-flag the following rig recalculations — these are not suppressed, they still \
+Reserve status does not create any pay entitlement for LLL Swap flying (10.P.4). \
+Check is_reserve: if "Reserve — on a day off (RDO)", explicitly cite §10.P edge \
+case 1 in NOTES: "Reserve on day off confirmed — 10.P.4 applies identically; no \
+pay, no pay protection." If "Reserve — on an active Reserve duty day", note §10.P.4 \
+applies; no additional edge case citation needed. If "Lineholder", standard 10.P.4 \
+applies. If lll_was_deadhead = yes, flag in NOTES: "Deadhead-to-live conversion \
+confirmed — swapping FA was required to work the live segment; verify crew legality \
+for the live flight. 10.P.4 still applies; no pay for the converted live leg." \
+Additionally, note that §10.M.2 (Company-initiated split pay protection) and \
+§10.J.9.a (equipment downgrade pay protection) are both explicitly barred by \
+10.P.4 for this FA — do not generate claims under either section. \
+Flag the following rig recalculations — these are not suppressed, they still \
 apply based on actual times: (a) Sit Rig: if the swap altered segment timing \
 within a duty period, recalculate sit rig based on actual sit times after the \
 swap; (b) Duty Rig: duty time for this FA ends at the actual release time of \
 the LLL leg flown; (c) TAFB Rig: if the swap changed the FA's sequence \
-composition, recalculate effective TAFB based on actual times of the LLL leg flown. \
-Additionally, note that §10.M.2 (Company-initiated split pay protection) and \
-§10.J.9.a (equipment downgrade pay protection) are both explicitly barred by \
-10.P.4 for this FA — do not generate claims under either section.
+composition, recalculate effective TAFB based on actual times of the LLL leg flown.
   * GAVE AWAY the LLL: this FA retains their original sequence pay protections \
 in full. SEQUENCE VALUE ANCHOR: all pay calculations (10.J.10, 10.K, 10.L.1, \
 10.L.3, 10.M, 10.T.3 150%) must use the original published sequence value \
 BEFORE the swap — never the post-swap composition. If the LLL was the \
 highest-value leg (confirmed yes), flag this explicitly: excluding it would \
 reduce the sequence value and therefore the 150% base — use pre-swap value. \
+If is_changeover_sequence = yes, apply a DOUBLE ANCHOR: (1) use the carryover \
+value from the prior bid month as the sequence base — not the published \
+changeover-sequence value; (2) then apply the pre-swap anchor — never the \
+post-swap composition. Note in REMEDY: "DOUBLE ANCHOR: (1) carryover value from \
+prior bid month; (2) pre-swap value — not post-swap composition." \
 If the FA has not provided the original sequence value, include in REMEDY: \
 "TBD — provide original published sequence value (pre-swap)." Note "10.P — \
 original sequence pay structure retained; sequence value = pre-swap original" \
-in each affected claim. Additionally, flag the following rig provisions — \
+in each affected claim. If gave_away_reserve_status = yes (FA is a Reserve), \
+check 10.L.6 eligibility before applying 10.L.1: a Reserve qualifies for 10.L.1 \
+(full pay+credit) only if they have no remaining Reserve days in the bid period; \
+otherwise 10.L.4 may apply instead. Flag in NOTES if 10.L.6 eligibility is unclear. \
+If lll_was_deadhead = yes, note in NOTES: "Deadhead-to-live conversion confirmed — \
+giving-away FA was released from the live segment; verify whether the arrangement \
+altered the FA's sequence composition for TAFB calculation." \
+Additionally, flag the following rig provisions — \
 these require recalculation based on the swap: (a) TAFB Rig: if the swap \
 changed sequence composition, recalculate effective TAFB against the original \
 sequence; (b) Duty Rig: duty time for the giving-away FA continues per the \
@@ -453,11 +515,20 @@ def main():
         selected.insert(selected.index("split_or_replaced"), "last_sequence")
     if "lll_swap" in selected:
         idx = selected.index("lll_swap") + 1
-        for qid in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]:
+        for qid in [
+            "lll_company_approved", "lll_swap_role", "is_reserve",
+            "lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status",
+            "is_changeover_sequence",
+        ]:
             if qid not in selected:
                 selected.insert(idx, qid)
                 idx += 1
-        if not all(q in selected for q in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]):
+        required_lll = [
+            "lll_company_approved", "lll_swap_role", "is_reserve",
+            "lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status",
+            "is_changeover_sequence",
+        ]
+        if not all(q in selected for q in required_lll):
             sys.exit("ERROR: Injection block integrity failure — LLL sub-questions missing from selected list.")
         if "has_premiums" not in selected:
             selected.append("has_premiums")
