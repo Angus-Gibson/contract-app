@@ -76,6 +76,9 @@ QUESTIONS = {
         ],
         "depends_on": {"lll_swap_role": "I swapped ONTO another FA's last live leg (I flew the leg)"},
     },
+    # NOTE: lll_was_deadhead applies to both roles. Role-specific FINAL_SYSTEM
+    # handling (swapped-onto: legality check; gave-away: TAFB impact) is driven by
+    # the lll_swap_role answer already recorded — no role gate needed here.
     "lll_was_deadhead": {
         "text": (
             "Was the Last Live Leg originally scheduled as a deadhead "
@@ -378,12 +381,15 @@ action after swap completion (not suppressed)."
 premium_types in the 10.V.5 carry-forward claim. If premium_types was not answered \
 or is "(not provided)", include in REMEDY: "TBD — FA to specify which premiums \
 (Lead, Purser, Galley, International, Speaker) were carried."
-- If both split_or_replaced and lll_swap are answered, check for interaction: if the \
-"entirely different flying" the FA was placed on IS the LLL swap leg itself, do not \
-generate a §10.L.3 claim — the LLL swap framework (§10.P) governs, not §10.L.3. If \
-the sequence modification and the LLL swap are separate events (the FA's sequence was \
-first modified, and a distinct LLL swap also occurred), both may generate independent \
-claims. Note any interaction in NOTES.
+- split_or_replaced / lll_swap interaction: if split_or_replaced is in the answers, \
+check for overlap — if the "entirely different flying" IS the LLL swap leg itself, \
+do not generate a §10.L.3 claim (§10.P governs); if they are separate events, both \
+may generate independent claims; note any interaction in NOTES. If split_or_replaced \
+is absent from answers (§10.L was not flagged by triage), examine the situation \
+narrative for any sequence modification — if the narrative suggests a sequence change \
+occurred, note in NOTES: "Sequence modification may have occurred — §10.L analysis \
+not performed; rep should verify whether the LLL swap also constitutes a schedulable \
+sequence change."
 - Rig recalculations (Sit Rig, Duty Rig, TAFB Rig): whenever a rig recalculation \
 is flagged, generate a STANDALONE DirectConnect claim block — do not bury it in \
 NOTES of another claim. You will not have actual block/sit/duty times; always use \
@@ -653,6 +659,10 @@ def main():
             "gave_away_reserve_remaining_days",
             "is_changeover_sequence", "held_carryover_at_conversion",
         ]
+        # Dependency chain note: ask_questions() skips questions whose depends_on
+        # parent was not met, so presence in selected is sufficient — skipping at
+        # display time is correct and intentional. This check guards against the
+        # injection loop itself failing to insert a required ID.
         if not all(q in selected for q in required_lll):
             sys.exit("ERROR: Injection block integrity failure — LLL sub-questions missing from selected list.")
         if "has_premiums" not in selected:
