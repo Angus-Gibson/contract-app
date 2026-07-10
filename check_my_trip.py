@@ -183,7 +183,10 @@ the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
 suppress any pay or pay-protection claim that would otherwise arise, and note \
 "10.P.4 — LLL Swap recipient: no pay, no pay protection" in each affected claim. \
 This applies equally if the FA is a Reserve on a day off — Reserve status does \
-not create any pay entitlement for LLL Swap flying (10.P.4). Additionally, \
+not create any pay entitlement for LLL Swap flying (10.P.4). If the FA confirmed \
+Reserve status (is_reserve = yes), explicitly cite §10.P edge case 1 in NOTES: \
+"Reserve on day off confirmed — 10.P.4 applies identically; no pay, no pay \
+protection." Additionally, \
 flag the following rig recalculations — these are not suppressed, they still \
 apply based on actual times: (a) Sit Rig: if the swap altered segment timing \
 within a duty period, recalculate sit rig based on actual sit times after the \
@@ -271,7 +274,9 @@ def run_triage(
             "format": {"type": "json_schema", "schema": TRIAGE_SCHEMA}
         },
     )
-    text = next(b.text for b in response.content if b.type == "text")
+    text = next((b.text for b in response.content if b.type == "text"), None)
+    if text is None:
+        sys.exit("ERROR: Triage response contained no text block.")
     try:
         return json.loads(text)
     except json.JSONDecodeError as e:
@@ -413,6 +418,9 @@ def main():
 
     # Pass 1 — Haiku triage (fast, no thinking)
     triage = run_triage(client, situation, provisions_json)
+    required = {"flagged_provisions", "questions_to_ask", "summary"}
+    if not required.issubset(triage):
+        sys.exit(f"ERROR: Triage response missing required keys. Got: {list(triage.keys())}")
 
     if not triage["flagged_provisions"] and "lll_swap" not in triage["questions_to_ask"]:
         print(f"\nNo provisions triggered.\n{triage['summary']}")
@@ -442,10 +450,12 @@ def main():
                 idx += 1
         assert all(q in selected for q in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]), \
             "Injection block integrity failure: LLL sub-questions missing from selected"
+        if "has_premiums" not in selected:
+            selected.append("has_premiums")
     answers = ask_questions(selected, detecting=not bool(triage["flagged_provisions"]))
 
     if not triage["flagged_provisions"] and answers.get("lll_swap") != "yes":
-        print(f"\nNo provisions triggered.\n{triage['summary']}")
+        print(f"\nNo LLL Swap confirmed and no provisions formally flagged — no claim to file.\n{triage['summary']}")
         return
 
     # Pass 3 — Opus final output (adaptive thinking, streaming)
