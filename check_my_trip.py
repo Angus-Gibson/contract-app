@@ -126,6 +126,15 @@ QUESTIONS = {
         ],
         "depends_on": {"is_changeover_sequence": "yes"},
     },
+    "post_swap_company_action": {
+        "text": (
+            "After the LLL Swap was completed, did the Company take any separate "
+            "scheduling action that disrupted your remaining flying "
+            "(e.g., cancel, reroute, or reassign a different sequence)?"
+        ),
+        "type": "yn",
+        "depends_on": {"lll_swap_role": "I swapped ONTO another FA's last live leg (I flew the leg)"},
+    },
     "has_premiums": {
         "text": (
             "Did your original sequence carry any premiums — "
@@ -145,6 +154,7 @@ QUESTION_ORDER = [
     "lll_swap_role",
     "is_reserve",
     "lll_was_deadhead",
+    "post_swap_company_action",
     "lll_highest_value_leg",
     "gave_away_reserve_status",
     "gave_away_reserve_remaining_days",
@@ -183,7 +193,12 @@ sequence value in why_triggered as PROVISIONAL — do not anchor it to the post-
 composition. The correct pre-swap value will be confirmed in Pass 3.
 
 NOTE — do NOT select these IDs; they are injected automatically by the application \
-when lll_swap is selected: "lll_swap_role", "is_reserve", "lll_highest_value_leg".\
+when lll_swap is selected: "lll_company_approved", "lll_swap_role", "is_reserve", \
+"lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status", \
+"gave_away_reserve_remaining_days", "is_changeover_sequence", \
+"held_carryover_at_conversion". The only ID you may select that is also \
+auto-injected is "has_premiums" — selecting it is harmless as the application \
+deduplicates.\
 """
 
 TRIAGE_SCHEMA = {
@@ -246,8 +261,10 @@ do NOT apply the 10.P.4 framework — the swap was not Company-authorized. Treat
 scheduling action as a Company-initiated change and analyze under the applicable \
 sections (10.T.3, 10.J, 10.K, 10.L, 10.M) as if the LLL swap never occurred. Note \
 in each claim: "LLL Swap approval not confirmed — 10.P.4 framework does not apply; \
-analyzed as Company-initiated scheduling change." If lll_company_approved = yes (or \
-not answered), proceed with the role-based 10.P.4 analysis below.
+analyzed as Company-initiated scheduling change." Disregard any PROVISIONAL sequence \
+value markers in the triage output — treat sequence values as actual (not provisional) \
+since the LLL swap value-anchor rules do not apply. If lll_company_approved = yes \
+(or not answered), proceed with the role-based 10.P.4 analysis below.
 - If LLL Swap is confirmed and approved, apply 10.P.4 based on the FA's role:
   * SWAPPED ONTO the LLL: this FA receives NO pay for any flights flown under \
 the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
@@ -311,18 +328,32 @@ based on actual sit times after the swap.
 - 10.T.3 suppression scope (swapped-onto FA only): §10.P.4 suppresses pay and \
 pay-protection claims caused by the LLL swap itself — it does not reach independent \
 Company violations that occur after the swap is complete. Before suppressing any \
-10.T.3 claim for a swapped-onto FA, apply a causal test: (a) if the scheduling \
-error that triggers 10.T.3 IS the LLL swap (e.g., the swap itself constituted a \
-post-report reschedule or sequence disruption), suppress the 10.T.3 claim under \
-10.P.4 and note "10.T.3 suppressed — violation caused by LLL swap; 10.P.4 bars \
-claim"; (b) if 10.T.3 is triggered by a separate, independent Company action that \
-occurred after the swap was completed (e.g., Crew Scheduling later rerouted or \
-cancelled the FA's remaining flying for an unrelated reason), that 10.T.3 claim \
-survives 10.P.4 and must be filed. If the cause is ambiguous from the situation \
-text, include the 10.T.3 claim and note in NOTES: "Causal determination required — \
-confirm whether this violation was caused by the LLL swap itself (suppressed under \
-10.P.4) or by an independent Company action after swap completion (not suppressed)."
+10.T.3 claim for a swapped-onto FA, apply a causal test using post_swap_company_action: \
+(a) if post_swap_company_action = no (no separate Company action after the swap), \
+the scheduling error that triggers 10.T.3 was the LLL swap itself — suppress the \
+10.T.3 claim under 10.P.4 and note "10.T.3 suppressed — violation caused by LLL \
+swap; 10.P.4 bars claim"; (b) if post_swap_company_action = yes (a separate Company \
+action occurred after swap completion), that 10.T.3 claim is independent of the \
+swap and survives 10.P.4 — generate the 10.T.3 claim and note "10.T.3 survives \
+10.P.4 — caused by independent Company action after swap completion"; (c) if \
+post_swap_company_action was not answered, include the 10.T.3 claim and note in \
+NOTES: "Causal determination required — confirm whether this violation was caused \
+by the LLL swap itself (suppressed under 10.P.4) or by an independent Company \
+action after swap completion (not suppressed)."
 - If premiums are confirmed, list them by name in the 10.V.5 carry-forward claim.
+- If both split_or_replaced and lll_swap are answered, check for interaction: if the \
+"entirely different flying" the FA was placed on IS the LLL swap leg itself, do not \
+generate a §10.L.3 claim — the LLL swap framework (§10.P) governs, not §10.L.3. If \
+the sequence modification and the LLL swap are separate events (the FA's sequence was \
+first modified, and a distinct LLL swap also occurred), both may generate independent \
+claims. Note any interaction in NOTES.
+- Rig recalculations (Sit Rig, Duty Rig, TAFB Rig) that result in additional pay \
+owed must each be filed as a standalone DirectConnect claim block (not merely noted \
+in the NOTES of another claim). For each rig where a recalculation is flagged, \
+generate a separate block with SECTION citing the applicable rig provision \
+(§11.D.5 Duty Rig, §11.D.6 Sit Rig, §2.AAA/11.D.4 TAFB Rig), CLAIM describing \
+the underpayment, REMEDY stating the recalculated amount or "TBD — provide: \
+[specify times needed]", and DEADLINE per the standard 96-hr window.
 - Keep each claim concise and ready to submit as-is.
 - If a provision remains ambiguous after the follow-up answers, include it but note \
   exactly what additional information is still needed.\
@@ -472,7 +503,7 @@ def stream_final_output(
         f"  [{p['confidence'].upper()}] {p['section']}: {p['title']}\n"
         f"  {p['why_triggered']}"
         for p in triage["flagged_provisions"]
-    ) or "  (None formally flagged by triage — LLL Swap confirmed yes via follow-up answers; base all 10.P analysis on answers below)"
+    ) or f"  (None formally flagged by triage — LLL Swap confirmed yes via follow-up answers; base all 10.P analysis on answers below)\n  Triage summary: {triage['summary']}"
 
     answers_text = (
         "\n".join(
@@ -563,18 +594,18 @@ def main():
         idx = selected.index("lll_swap") + 1
         for qid in [
             "lll_company_approved", "lll_swap_role", "is_reserve",
-            "lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status",
-            "gave_away_reserve_remaining_days", "is_changeover_sequence",
-            "held_carryover_at_conversion",
+            "lll_was_deadhead", "post_swap_company_action", "lll_highest_value_leg",
+            "gave_away_reserve_status", "gave_away_reserve_remaining_days",
+            "is_changeover_sequence", "held_carryover_at_conversion",
         ]:
             if qid not in selected:
                 selected.insert(idx, qid)
                 idx += 1
         required_lll = [
             "lll_company_approved", "lll_swap_role", "is_reserve",
-            "lll_was_deadhead", "lll_highest_value_leg", "gave_away_reserve_status",
-            "gave_away_reserve_remaining_days", "is_changeover_sequence",
-            "held_carryover_at_conversion",
+            "lll_was_deadhead", "post_swap_company_action", "lll_highest_value_leg",
+            "gave_away_reserve_status", "gave_away_reserve_remaining_days",
+            "is_changeover_sequence", "held_carryover_at_conversion",
         ]
         if not all(q in selected for q in required_lll):
             sys.exit("ERROR: Injection block integrity failure — LLL sub-questions missing from selected list.")
