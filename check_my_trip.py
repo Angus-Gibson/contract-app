@@ -167,7 +167,10 @@ premium carry-forward per 10.V.5 if applicable]
 ---
 
 RULES:
-- Output claims ONLY for definitively confirmed provisions.
+- Output claims ONLY for definitively confirmed provisions — confirmed either \
+by the triage flagged-provisions list OR by the follow-up answers (e.g., \
+LLL Swap confirmed yes in answers triggers 10.P analysis even if no provision \
+was formally flagged by triage).
 - If LLL Swap is confirmed (yes), apply 10.P.4 based on the FA's role:
   * SWAPPED ONTO the LLL: this FA receives NO pay for any flights flown under \
 the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
@@ -334,7 +337,7 @@ def stream_final_output(
         f"  [{p['confidence'].upper()}] {p['section']}: {p['title']}\n"
         f"  {p['why_triggered']}"
         for p in triage["flagged_provisions"]
-    )
+    ) or "  (None formally flagged by triage — LLL keyword detected in situation text; proceed from follow-up answers)"
 
     answers_text = (
         "\n".join(
