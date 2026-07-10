@@ -111,12 +111,17 @@ Choose from exactly these IDs:
 last_sequence = yes)
   "lll_swap"          — select if any rescheduling provision (10.J/10.K/10.L/10.M/10.P) \
 is flagged, OR if the situation text contains any mention of "last live leg", "LLL", \
-or "swap" — select this regardless of which provisions are flagged
+or "LLL swap" or "last live leg swap" — select this regardless of which provisions are flagged
   "has_premiums"      — select if any pay-protection provision (10.J/10.K/10.L/10.V/16) \
 is flagged
 
 Return only IDs that are genuinely needed. If all flagged provisions are "definite" \
 and no ambiguity exists, return an empty list.
+
+IMPORTANT — sequence value: if any pay-protection provision (10.J.10, 10.K, 10.L, \
+10.M, 10.T.3) is flagged alongside any LLL-related provision or keyword, mark the \
+sequence value in why_triggered as PROVISIONAL — do not anchor it to the post-swap \
+composition. The correct pre-swap value will be confirmed in Pass 3.
 
 NOTE — do NOT select these IDs; they are injected automatically by the application \
 when lll_swap is selected: "lll_swap_role", "is_reserve", "lll_highest_value_leg".\
@@ -191,7 +196,11 @@ flag the following rig recalculations — these are not suppressed, they still \
 apply based on actual times: (a) Sit Rig: if the swap altered segment timing \
 within a duty period, recalculate sit rig based on actual sit times after the \
 swap; (b) Duty Rig: duty time for this FA ends at the actual release time of \
-the LLL leg flown.
+the LLL leg flown; (c) TAFB Rig: if the swap changed the FA's sequence \
+composition, recalculate effective TAFB based on actual times of the LLL leg flown. \
+Additionally, note that §10.M.2 (Company-initiated split pay protection) and \
+§10.J.9.a (equipment downgrade pay protection) are both explicitly barred by \
+10.P.4 for this FA — do not generate claims under either section.
   * GAVE AWAY the LLL: this FA retains their original sequence pay protections \
 in full. SEQUENCE VALUE ANCHOR: all pay calculations (10.J.10, 10.K, 10.L.1, \
 10.L.3, 10.M, 10.T.3 150%) must use the original published sequence value \
@@ -355,7 +364,7 @@ def stream_final_output(
         f"  [{p['confidence'].upper()}] {p['section']}: {p['title']}\n"
         f"  {p['why_triggered']}"
         for p in triage["flagged_provisions"]
-    ) or "  (None formally flagged by triage — LLL keyword detected in situation text; proceed from follow-up answers)"
+    ) or "  (None formally flagged by triage — LLL Swap confirmed yes via follow-up answers; base all 10.P analysis on answers below)"
 
     answers_text = (
         "\n".join(
@@ -448,10 +457,16 @@ def main():
             if qid not in selected:
                 selected.insert(idx, qid)
                 idx += 1
-        assert all(q in selected for q in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]), \
-            "Injection block integrity failure: LLL sub-questions missing from selected"
+        if not all(q in selected for q in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]):
+            sys.exit("ERROR: Injection block integrity failure — LLL sub-questions missing from selected list.")
         if "has_premiums" not in selected:
             selected.append("has_premiums")
+    pay_protection_prefixes = ("10.J", "10.K", "10.L", "10.V", "16")
+    if "has_premiums" not in selected and any(
+        p["section"].startswith(pay_protection_prefixes)
+        for p in triage["flagged_provisions"]
+    ):
+        selected.append("has_premiums")
     answers = ask_questions(selected, detecting=not bool(triage["flagged_provisions"]))
 
     if not triage["flagged_provisions"] and answers.get("lll_swap") != "yes":
