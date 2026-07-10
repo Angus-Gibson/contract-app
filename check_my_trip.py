@@ -405,10 +405,14 @@ def main():
         print(f"\nNo provisions triggered.\n{triage['summary']}")
         return
 
-    print(f"\n  {len(triage['flagged_provisions'])} provision(s) flagged:")
-    for p in triage["flagged_provisions"]:
-        marker = "✓" if p["confidence"] == "definite" else "?"
-        print(f"  [{marker}] {p['section']} — {p['title']}")
+    if triage["flagged_provisions"]:
+        print(f"\n  {len(triage['flagged_provisions'])} provision(s) flagged:")
+        for p in triage["flagged_provisions"]:
+            marker = "✓" if p["confidence"] == "definite" else "?"
+            print(f"  [{marker}] {p['section']} — {p['title']}")
+    else:
+        print("\n  No provisions formally flagged by keyword scan.")
+        print("  LLL swap keyword detected — continuing to follow-up questions.")
 
     # Pass 2 — follow-up questions (local, no API call)
     # lll_swap_role is always needed when lll_swap is selected; inject it here
