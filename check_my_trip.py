@@ -303,8 +303,14 @@ attempted-but-unapproved swap may itself be the Company error triggering 10.T.3.
 If post_swap_company_action = yes, a SECOND independent Company action also occurred \
 after the failed swap attempt — generate standalone claims for each confirmed \
 independent violation; both the attempted swap (as a Company-initiated scheduling \
-error) and the second action may separately trigger §10.T.3 if §10.T.3 conditions \
-are met for each event. If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
+error) and the second action may separately trigger §10.T.3. For the attempted swap \
+(event 1), apply the had_reported gate normally. For the second independent action \
+(event 2), if had_reported = no was anchored to the first disruption, flag in NOTES: \
+"Verify: was the FA post-report at the time of the SECOND Company action? If yes, \
+§10.T.3 may apply to that event independently even if had_reported = no for the \
+first event." If post_swap_company_action = no, analyze the attempted swap as the \
+sole Company-initiated disruption event and do not generate a second independent \
+claim. If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
 If lll_company_approved was not answered, treat as unapproved (Company-initiated \
 framework) and flag in NOTES: "LLL Swap approval status not confirmed — applying \
 Company-initiated framework; verify approval status before filing."
@@ -335,8 +341,10 @@ Flag the following rig recalculations — these are not suppressed, they still \
 apply based on actual times: (a) Sit Rig: if the swap altered segment timing \
 within a duty period, recalculate sit rig based on actual sit times after the \
 swap; (b) Duty Rig: duty time for this FA ends at the actual release time of \
-the LLL leg flown; (c) TAFB Rig: if the swap changed the FA's sequence \
-composition, recalculate effective TAFB based on actual times of the LLL leg flown.
+the LLL leg flown; (c) TAFB Rig: a swapped-onto FA who flew a leg from another \
+FA's sequence always has their sequence composition changed — this condition is \
+definitively satisfied; generate the standalone TAFB rig claim (§2.AAA/11.D.4) \
+and recalculate effective TAFB based on actual times of the LLL leg flown.
   * GAVE AWAY the LLL: this FA retains their original sequence pay protections \
 in full. SEQUENCE VALUE ANCHOR: all pay calculations (10.J.10, 10.K, 10.L.1, \
 10.L.3, 10.M, 10.T.3 150%) must use the original published sequence value \
@@ -359,6 +367,9 @@ in each affected claim. If gave_away_reserve_status = yes (FA is a Reserve), che
 if "Reserve — on an active Reserve duty day", flag in NOTES: "Active Reserve duty day \
 confirmed — pre-swap Reserve guarantee/duty pay is not extinguished by any pay \
 adjustment; verify with Local whether accrued duty pay remains owed independently." \
+If "Reserve — on a day off (RDO)", flag in NOTES: "Giving-away FA was on a Reserve \
+day off — verify with Local whether any day-off protections under §12.B.2.d interact \
+with the retained pay protections; no active duty obligation exists for this day." \
 Apply 10.L.6 eligibility using gave_away_reserve_remaining_days: if \
 gave_away_reserve_remaining_days = no (no remaining Reserve days at time of \
 disruption), the Reserve qualifies for 10.L.1 — full pay+credit, no fly obligation; \
