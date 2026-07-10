@@ -49,6 +49,30 @@ QUESTIONS = {
         "text": "Was a Last Live Leg (LLL) Swap in effect on this sequence?",
         "type": "yn",
     },
+    "lll_swap_role": {
+        "text": "In that LLL Swap, what was your role?",
+        "type": "choice",
+        "choices": [
+            "I swapped ONTO another FA's last live leg (I flew the leg)",
+            "I gave AWAY my last live leg (another FA flew it for me)",
+        ],
+        "depends_on": {"lll_swap": "yes"},
+    },
+    "is_reserve": {
+        "text": "Are you a Reserve (as opposed to a Lineholder)?",
+        "type": "yn",
+        "depends_on": {"lll_swap": "yes"},
+    },
+    "lll_highest_value_leg": {
+        "text": (
+            "Was the leg you gave away the highest-value leg in your sequence "
+            "(i.e., would removing it reduce your sequence's total value)?"
+        ),
+        "type": "yn",
+        "depends_on": {
+            "lll_swap_role": "I gave AWAY my last live leg (another FA flew it for me)"
+        },
+    },
     "has_premiums": {
         "text": (
             "Did your original sequence carry any premiums — "
@@ -64,6 +88,9 @@ QUESTION_ORDER = [
     "had_reported",
     "split_or_replaced",
     "lll_swap",
+    "lll_swap_role",
+    "is_reserve",
+    "lll_highest_value_leg",
     "has_premiums",
 ]
 
@@ -83,7 +110,8 @@ Choose from exactly these IDs:
   "split_or_replaced" — select if any 10.L provision is flagged (shown only when \
 last_sequence = yes)
   "lll_swap"          — select if any rescheduling provision (10.J/10.K/10.L/10.M/10.P) \
-is flagged
+is flagged, OR if the situation text contains any mention of "last live leg", "LLL", \
+or "swap" — select this regardless of which provisions are flagged
   "has_premiums"      — select if any pay-protection provision (10.J/10.K/10.L/10.V/16) \
 is flagged
 
@@ -140,8 +168,34 @@ premium carry-forward per 10.V.5 if applicable]
 
 RULES:
 - Output claims ONLY for definitively confirmed provisions.
-- If LLL Swap is confirmed (yes), note its impact on pay protection in every \
-  affected claim.
+- If LLL Swap is confirmed (yes), apply 10.P.4 based on the FA's role:
+  * SWAPPED ONTO the LLL: this FA receives NO pay for any flights flown under \
+the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
+suppress any pay or pay-protection claim that would otherwise arise, and note \
+"10.P.4 — LLL Swap recipient: no pay, no pay protection" in each affected claim. \
+This applies equally if the FA is a Reserve on a day off — Reserve status does \
+not create any pay entitlement for LLL Swap flying (10.P.4). Additionally, \
+flag the following rig recalculations — these are not suppressed, they still \
+apply based on actual times: (a) Sit Rig: if the swap altered segment timing \
+within a duty period, recalculate sit rig based on actual sit times after the \
+swap; (b) Duty Rig: duty time for this FA ends at the actual release time of \
+the LLL leg flown.
+  * GAVE AWAY the LLL: this FA retains their original sequence pay protections \
+in full. SEQUENCE VALUE ANCHOR: all pay calculations (10.J.10, 10.K, 10.L.1, \
+10.L.3, 10.M, 10.T.3 150%) must use the original published sequence value \
+BEFORE the swap — never the post-swap composition. If the LLL was the \
+highest-value leg (confirmed yes), flag this explicitly: excluding it would \
+reduce the sequence value and therefore the 150% base — use pre-swap value. \
+If the FA has not provided the original sequence value, include in REMEDY: \
+"TBD — provide original published sequence value (pre-swap)." Note "10.P — \
+original sequence pay structure retained; sequence value = pre-swap original" \
+in each affected claim. Additionally, flag the following rig provisions — \
+these require recalculation based on the swap: (a) TAFB Rig: if the swap \
+changed sequence composition, recalculate effective TAFB against the original \
+sequence; (b) Duty Rig: duty time for the giving-away FA continues per the \
+original sequence release time, not the LLL leg's actual release; (c) Sit Rig: \
+if the swap altered segment timing within a duty period, recalculate sit rig \
+based on actual sit times after the swap.
 - If premiums are confirmed, list them by name in the 10.V.5 carry-forward claim.
 - Keep each claim concise and ready to submit as-is.
 - If a provision remains ambiguous after the follow-up answers, include it but note \
@@ -344,7 +398,7 @@ def main():
     # Pass 1 — Haiku triage (fast, no thinking)
     triage = run_triage(client, situation, provisions_json)
 
-    if not triage["flagged_provisions"]:
+    if not triage["flagged_provisions"] and "lll_swap" not in triage["questions_to_ask"]:
         print(f"\nNo provisions triggered.\n{triage['summary']}")
         return
 
@@ -354,7 +408,16 @@ def main():
         print(f"  [{marker}] {p['section']} — {p['title']}")
 
     # Pass 2 — follow-up questions (local, no API call)
-    answers = ask_questions(triage["questions_to_ask"])
+    # lll_swap_role is always needed when lll_swap is selected; inject it here
+    # rather than having Haiku decide — the depends_on gate handles display.
+    selected = list(triage["questions_to_ask"])
+    if "lll_swap" in selected:
+        idx = selected.index("lll_swap") + 1
+        for qid in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]:
+            if qid not in selected:
+                selected.insert(idx, qid)
+                idx += 1
+    answers = ask_questions(selected)
 
     # Pass 3 — Opus final output (adaptive thinking, streaming)
     stream_final_output(client, situation, provisions_json, triage, answers)
