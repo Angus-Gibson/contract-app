@@ -101,6 +101,15 @@ QUESTIONS = {
         "type": "yn",
         "depends_on": {"lll_swap_role": "I gave AWAY my last live leg (another FA flew it for me)"},
     },
+    "gave_away_reserve_day_type": {
+        "text": "What is your Reserve status on this day?",
+        "type": "choice",
+        "choices": [
+            "Reserve — on a day off (RDO)",
+            "Reserve — on an active Reserve duty day",
+        ],
+        "depends_on": {"gave_away_reserve_status": "yes"},
+    },
     "gave_away_reserve_remaining_days": {
         "text": "Do you have any remaining Reserve days in this bid period?",
         "type": "yn",
@@ -133,7 +142,7 @@ QUESTIONS = {
             "(e.g., cancel, reroute, or reassign a different sequence)?"
         ),
         "type": "yn",
-        "depends_on": {"lll_swap_role": "I swapped ONTO another FA's last live leg (I flew the leg)"},
+        "depends_on": {"lll_swap": "yes", "lll_company_approved": "yes"},
     },
     "has_premiums": {
         "text": (
@@ -157,6 +166,7 @@ QUESTION_ORDER = [
     "post_swap_company_action",
     "lll_highest_value_leg",
     "gave_away_reserve_status",
+    "gave_away_reserve_day_type",
     "gave_away_reserve_remaining_days",
     "is_changeover_sequence",
     "held_carryover_at_conversion",
@@ -261,10 +271,12 @@ do NOT apply the 10.P.4 framework — the swap was not Company-authorized. Treat
 scheduling action as a Company-initiated change and analyze under the applicable \
 sections (10.T.3, 10.J, 10.K, 10.L, 10.M) as if the LLL swap never occurred. Note \
 in each claim: "LLL Swap approval not confirmed — 10.P.4 framework does not apply; \
-analyzed as Company-initiated scheduling change." Disregard any PROVISIONAL sequence \
-value markers in the triage output — treat sequence values as actual (not provisional) \
-since the LLL swap value-anchor rules do not apply. If lll_company_approved = yes \
-(or not answered), proceed with the role-based 10.P.4 analysis below.
+analyzed as Company-initiated scheduling change." Disregard any PROVISIONAL sequence value markers in the triage output. For any \
+10.T.3 150% calculation, use the original published sequence value BEFORE the \
+attempted swap — do not use post-disruption actual flying value, as the \
+attempted-but-unapproved swap may itself be the Company error triggering 10.T.3. \
+If lll_company_approved = yes (or not answered), proceed with the role-based \
+10.P.4 analysis below.
 - If LLL Swap is confirmed and approved, apply 10.P.4 based on the FA's role:
   * SWAPPED ONTO the LLL: this FA receives NO pay for any flights flown under \
 the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
@@ -282,8 +294,12 @@ Local whether accrued duty pay remains owed. LLL swap pay itself: not owed \
 confirmed — swapping FA was required to work the live segment; verify crew legality \
 for the live flight. 10.P.4 still applies; no pay for the converted live leg." \
 Additionally, note that §10.M.2 (Company-initiated split pay protection) and \
-§10.J.9.a (equipment downgrade pay protection) are both explicitly barred by \
-10.P.4 for this FA — do not generate claims under either section. \
+§10.J.9.a (equipment downgrade pay protection) are barred by 10.P.4 for actions \
+caused by the LLL swap itself — do not generate claims for swap-caused disruptions \
+under either section. Exception: if post_swap_company_action = yes, an independent \
+Company action after swap completion may trigger §10.M.2 or §10.J.9.a independently \
+— apply the same causal test used for 10.T.3 and generate those claims if the \
+triggering event is the independent action, not the swap. \
 Flag the following rig recalculations — these are not suppressed, they still \
 apply based on actual times: (a) Sit Rig: if the swap altered segment timing \
 within a duty period, recalculate sit rig based on actual sit times after the \
@@ -308,13 +324,20 @@ value is the base; the prior-bid-month carryover value does not apply. \
 If the FA has not provided the original sequence value, include in REMEDY: \
 "TBD — provide original published sequence value (pre-swap)." Note "10.P — \
 original sequence pay structure retained; sequence value = pre-swap original" \
-in each affected claim. If gave_away_reserve_status = yes (FA is a Reserve), apply 10.L.6 eligibility \
-using gave_away_reserve_remaining_days: if gave_away_reserve_remaining_days = no \
-(no remaining Reserve days), the Reserve qualifies for 10.L.1 — full pay+credit, \
-no fly obligation; if gave_away_reserve_remaining_days = yes (remaining Reserve days \
-exist), 10.L.4 applies instead — pay protected for cancelled portions, FA must still \
-fly uncancelled portions. Cite the applicable section (10.L.1 or 10.L.4) in the \
-SECTION and CLAIM fields accordingly. \
+in each affected claim. If gave_away_reserve_status = yes (FA is a Reserve), check gave_away_reserve_day_type: \
+if "Reserve — on an active Reserve duty day", flag in NOTES: "Active Reserve duty day \
+confirmed — pre-swap Reserve guarantee/duty pay is not extinguished by any pay \
+adjustment; verify with Local whether accrued duty pay remains owed independently." \
+Apply 10.L.6 eligibility using gave_away_reserve_remaining_days: if \
+gave_away_reserve_remaining_days = no (no remaining Reserve days at time of \
+disruption), the Reserve qualifies for 10.L.1 — full pay+credit, no fly obligation; \
+if gave_away_reserve_remaining_days = yes (remaining Reserve days existed), 10.L.4 \
+applies instead — pay protected for cancelled portions, FA must still fly uncancelled \
+portions. Cite the applicable section (10.L.1 or 10.L.4) in SECTION and CLAIM. \
+If post_swap_company_action = yes (a separate Company action disrupted the FA's \
+remaining flying after swap completion), also analyze 10.T.3 for any post-report \
+Company error — this claim is independent of the LLL swap framework and not subject \
+to 10.P suppression. Generate a standalone 10.T.3 claim if triggered. \
 If lll_was_deadhead = yes, note in NOTES: "Deadhead-to-live conversion confirmed — \
 giving-away FA was released from the live segment; verify whether the arrangement \
 altered the FA's sequence composition for TAFB calculation." \
@@ -590,12 +613,15 @@ def main():
     selected = list(triage["questions_to_ask"])
     if "split_or_replaced" in selected and "last_sequence" not in selected:
         selected.insert(selected.index("split_or_replaced"), "last_sequence")
+    if "lll_swap" in selected and "last_sequence" not in selected:
+        selected.insert(0, "last_sequence")
     if "lll_swap" in selected:
         idx = selected.index("lll_swap") + 1
         for qid in [
             "lll_company_approved", "lll_swap_role", "is_reserve",
             "lll_was_deadhead", "post_swap_company_action", "lll_highest_value_leg",
-            "gave_away_reserve_status", "gave_away_reserve_remaining_days",
+            "gave_away_reserve_status", "gave_away_reserve_day_type",
+            "gave_away_reserve_remaining_days",
             "is_changeover_sequence", "held_carryover_at_conversion",
         ]:
             if qid not in selected:
@@ -604,7 +630,8 @@ def main():
         required_lll = [
             "lll_company_approved", "lll_swap_role", "is_reserve",
             "lll_was_deadhead", "post_swap_company_action", "lll_highest_value_leg",
-            "gave_away_reserve_status", "gave_away_reserve_remaining_days",
+            "gave_away_reserve_status", "gave_away_reserve_day_type",
+            "gave_away_reserve_remaining_days",
             "is_changeover_sequence", "held_carryover_at_conversion",
         ]
         if not all(q in selected for q in required_lll):
