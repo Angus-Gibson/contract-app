@@ -201,7 +201,9 @@ every provision that is POTENTIALLY triggered.
 Choose from exactly these IDs:
 
   "last_sequence"     — select if ANY 10.J, 10.K, 10.L, or 10.M provision is flagged
-  "had_reported"      — select if any 10.J or 10.T provision is flagged
+  "had_reported"      — select if any 10.J or 10.T provision is flagged, OR if \
+lll_swap is selected (because a post-swap Company action may trigger §10.T.3 \
+independently, requiring the post-report threshold to be confirmed)
   "split_or_replaced" — select if any 10.L provision is flagged (shown only when \
 last_sequence = yes)
   "lll_swap"          — select if any rescheduling provision (10.J/10.K/10.L/10.M/10.P) \
@@ -310,10 +312,20 @@ error) and the second action may separately trigger §10.T.3. For the attempted 
 §10.T.3 may apply to that event independently even if had_reported = no for the \
 first event." If post_swap_company_action = no, analyze the attempted swap as the \
 sole Company-initiated disruption event and do not generate a second independent \
-claim. If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
+claim. Additionally, if the attempted swap caused actual flying different from the \
+original published sequence (e.g., the FA flew or was released from a leg outside \
+their original schedule), flag Duty Rig (§11.D.5), Sit Rig (§11.D.6), and TAFB \
+Rig (§2.AAA/§11.D.4) for recalculation and generate standalone DirectConnect \
+claim blocks per the rig rules at the end of these instructions. \
+If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
 If lll_company_approved was not answered, treat as unapproved (Company-initiated \
 framework) and flag in NOTES: "LLL Swap approval status not confirmed — applying \
-Company-initiated framework; verify approval status before filing."
+Company-initiated framework; verify approval status before filing." Apply the same \
+post_swap_company_action two-event logic as the lll_company_approved=no path: if \
+post_swap_company_action = yes, generate standalone claims for each confirmed \
+independent violation with the per-event had_reported gate and second-event \
+verification note; if post_swap_company_action = no, analyze the attempted swap \
+as the sole disruption event and do not generate a second independent claim.
 - If LLL Swap is confirmed and approved, apply 10.P.4 based on the FA's role:
   * SWAPPED ONTO the LLL: this FA receives NO pay for any flights flown under \
 the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
@@ -370,7 +382,9 @@ adjustment; verify with Local whether accrued duty pay remains owed independentl
 If "Reserve — on a day off (RDO)", flag in NOTES: "Giving-away FA was on a Reserve \
 day off — verify with Local whether any day-off protections under §12.B.2.d interact \
 with the retained pay protections; no active duty obligation exists for this day." \
-Apply 10.L.6 eligibility using gave_away_reserve_remaining_days: if \
+If gave_away_reserve_remaining_days is not in answers, the FA is a Lineholder — \
+skip 10.L.6 entirely; the Reserve eligibility gate does not apply. Otherwise, \
+apply 10.L.6 eligibility using gave_away_reserve_remaining_days: if \
 gave_away_reserve_remaining_days = no (no remaining Reserve days at time of \
 disruption), the Reserve qualifies for 10.L.1 — full pay+credit, no fly obligation; \
 if gave_away_reserve_remaining_days = yes (remaining Reserve days existed), 10.L.4 \
@@ -378,14 +392,17 @@ applies instead — pay protected for cancelled portions, FA must still fly unca
 portions. Cite the applicable section (10.L.1 or 10.L.4) in SECTION and CLAIM. \
 Apply a causal test using post_swap_company_action: (a) if post_swap_company_action \
 = yes (a separate Company action disrupted the FA's remaining flying after swap \
-completion), analyze 10.T.3 for any post-report Company error — this claim is \
-independent of the LLL swap framework and not subject to 10.P suppression; generate \
-a standalone 10.T.3 claim if triggered and note "10.T.3 survives — caused by \
-independent Company action after swap completion"; (b) if post_swap_company_action \
-= no, no standalone post-swap 10.T.3 claim is warranted under the gave-away \
-framework; (c) if post_swap_company_action was not answered, include a 10.T.3 claim \
-and note "Causal determination required — confirm whether a separate Company action \
-disrupted this FA's flying after swap completion." \
+completion), apply the had_reported gate before generating the 10.T.3 claim — if \
+had_reported = yes, generate a standalone 10.T.3 claim and note "10.T.3 survives — \
+caused by independent Company action after swap completion"; if had_reported = no \
+(anchored to first disruption), flag in NOTES: "Verify: was the FA post-report at \
+the time of this Company action? If yes, §10.T.3 applies independently"; if \
+had_reported was not answered, include the 10.T.3 claim with the standard \
+"Verify: was the FA post-report?" note; (b) if post_swap_company_action = no, no \
+standalone post-swap 10.T.3 claim is warranted under the gave-away framework; \
+(c) if post_swap_company_action was not answered, apply the had_reported gate as in \
+sub-case (a) and note "Causal determination required — confirm whether a separate \
+Company action disrupted this FA's flying after swap completion." \
 If lll_was_deadhead = yes, a deadhead-to-live conversion confirms the FA's sequence \
 composition changed (the deadhead segment was replaced by live flying) — treat this \
 as satisfying the "swap changed sequence composition" condition below and generate \
@@ -690,6 +707,11 @@ def main():
             if qid not in selected:
                 selected.insert(idx, qid)
                 idx += 1
+        # had_reported is always needed on LLL paths — 10.T.3 may arise from
+        # post_swap_company_action=yes on either role branch regardless of whether
+        # Haiku flagged a 10.J/10.T provision.
+        if "had_reported" not in selected:
+            selected.append("had_reported")
         required_lll = [
             "lll_company_approved", "lll_swap_role", "is_reserve",
             "lll_was_deadhead", "post_swap_company_action", "lll_highest_value_leg",
