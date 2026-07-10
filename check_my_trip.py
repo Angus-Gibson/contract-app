@@ -279,6 +279,20 @@ sequence; (b) Duty Rig: duty time for the giving-away FA continues per the \
 original sequence release time, not the LLL leg's actual release; (c) Sit Rig: \
 if the swap altered segment timing within a duty period, recalculate sit rig \
 based on actual sit times after the swap.
+- 10.T.3 suppression scope (swapped-onto FA only): §10.P.4 suppresses pay and \
+pay-protection claims caused by the LLL swap itself — it does not reach independent \
+Company violations that occur after the swap is complete. Before suppressing any \
+10.T.3 claim for a swapped-onto FA, apply a causal test: (a) if the scheduling \
+error that triggers 10.T.3 IS the LLL swap (e.g., the swap itself constituted a \
+post-report reschedule or sequence disruption), suppress the 10.T.3 claim under \
+10.P.4 and note "10.T.3 suppressed — violation caused by LLL swap; 10.P.4 bars \
+claim"; (b) if 10.T.3 is triggered by a separate, independent Company action that \
+occurred after the swap was completed (e.g., Crew Scheduling later rerouted or \
+cancelled the FA's remaining flying for an unrelated reason), that 10.T.3 claim \
+survives 10.P.4 and must be filed. If the cause is ambiguous from the situation \
+text, include the 10.T.3 claim and note in NOTES: "Causal determination required — \
+confirm whether this violation was caused by the LLL swap itself (suppressed under \
+10.P.4) or by an independent Company action after swap completion (not suppressed)."
 - If premiums are confirmed, list them by name in the 10.V.5 carry-forward claim.
 - Keep each claim concise and ready to submit as-is.
 - If a provision remains ambiguous after the follow-up answers, include it but note \
