@@ -111,7 +111,7 @@ QUESTIONS = {
         "depends_on": {"gave_away_reserve_status": "yes"},
     },
     "gave_away_reserve_remaining_days": {
-        "text": "Do you have any remaining Reserve days in this bid period?",
+        "text": "At the time of the LLL Swap disruption, did you have any remaining Reserve days in this bid period?",
         "type": "yn",
         "depends_on": {"gave_away_reserve_status": "yes"},
     },
@@ -151,6 +151,14 @@ QUESTIONS = {
         ),
         "type": "yn",
     },
+    "premium_types": {
+        "text": (
+            "Which premiums did your sequence carry? "
+            "(Enter all that apply, e.g.: Lead, International)"
+        ),
+        "type": "freetext",
+        "depends_on": {"has_premiums": "yes"},
+    },
 }
 
 # Canonical order for display
@@ -171,6 +179,7 @@ QUESTION_ORDER = [
     "is_changeover_sequence",
     "held_carryover_at_conversion",
     "has_premiums",
+    "premium_types",
 ]
 
 # ── Pass 1: Haiku triage + question selection ──────────────────────────────────
@@ -275,8 +284,10 @@ analyzed as Company-initiated scheduling change." Disregard any PROVISIONAL sequ
 10.T.3 150% calculation, use the original published sequence value BEFORE the \
 attempted swap — do not use post-disruption actual flying value, as the \
 attempted-but-unapproved swap may itself be the Company error triggering 10.T.3. \
-If lll_company_approved = yes (or not answered), proceed with the role-based \
-10.P.4 analysis below.
+If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
+If lll_company_approved was not answered, treat as unapproved (Company-initiated \
+framework) and flag in NOTES: "LLL Swap approval status not confirmed — applying \
+Company-initiated framework; verify approval status before filing."
 - If LLL Swap is confirmed and approved, apply 10.P.4 based on the FA's role:
   * SWAPPED ONTO the LLL: this FA receives NO pay for any flights flown under \
 the swap AND NO pay protection if their own sequence is disrupted. Explicitly \
@@ -363,20 +374,24 @@ post_swap_company_action was not answered, include the 10.T.3 claim and note in 
 NOTES: "Causal determination required — confirm whether this violation was caused \
 by the LLL swap itself (suppressed under 10.P.4) or by an independent Company \
 action after swap completion (not suppressed)."
-- If premiums are confirmed, list them by name in the 10.V.5 carry-forward claim.
+- If premiums are confirmed (has_premiums = yes), list the specific premiums from \
+premium_types in the 10.V.5 carry-forward claim. If premium_types was not answered \
+or is "(not provided)", include in REMEDY: "TBD — FA to specify which premiums \
+(Lead, Purser, Galley, International, Speaker) were carried."
 - If both split_or_replaced and lll_swap are answered, check for interaction: if the \
 "entirely different flying" the FA was placed on IS the LLL swap leg itself, do not \
 generate a §10.L.3 claim — the LLL swap framework (§10.P) governs, not §10.L.3. If \
 the sequence modification and the LLL swap are separate events (the FA's sequence was \
 first modified, and a distinct LLL swap also occurred), both may generate independent \
 claims. Note any interaction in NOTES.
-- Rig recalculations (Sit Rig, Duty Rig, TAFB Rig) that result in additional pay \
-owed must each be filed as a standalone DirectConnect claim block (not merely noted \
-in the NOTES of another claim). For each rig where a recalculation is flagged, \
-generate a separate block with SECTION citing the applicable rig provision \
-(§11.D.5 Duty Rig, §11.D.6 Sit Rig, §2.AAA/11.D.4 TAFB Rig), CLAIM describing \
-the underpayment, REMEDY stating the recalculated amount or "TBD — provide: \
-[specify times needed]", and DEADLINE per the standard 96-hr window.
+- Rig recalculations (Sit Rig, Duty Rig, TAFB Rig): whenever a rig recalculation \
+is flagged, generate a STANDALONE DirectConnect claim block — do not bury it in \
+NOTES of another claim. You will not have actual block/sit/duty times; always use \
+REMEDY = "TBD — provide: [specify exact times needed for this rig calculation]". \
+SECTION: §11.D.5 (Duty Rig), §11.D.6 (Sit Rig), or §2.AAA/11.D.4 (TAFB Rig). \
+DEADLINE: standard 96-hr window. Generate the block regardless of whether you can \
+confirm the direction of underpayment — the rep needs the placeholder to collect \
+times and calculate.
 - Keep each claim concise and ready to submit as-is.
 - If a provision remains ambiguous after the follow-up answers, include it but note \
   exactly what additional information is still needed.\
@@ -504,6 +519,10 @@ def ask_questions(selected_ids: list, answers: dict | None = None, detecting: bo
                     answers[qid] = q["choices"][int(raw) - 1]
                     break
                 print(f"       Please enter a number between 1 and {len(q['choices'])}.")
+
+        elif q["type"] == "freetext":
+            raw = input("       Answer: ").strip()
+            answers[qid] = raw if raw else "(not provided)"
 
     if asked == 0:
         print("\n  No follow-up questions needed.")
