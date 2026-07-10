@@ -29,7 +29,8 @@ QUESTIONS = {
     "had_reported": {
         "text": (
             "Had you already reported/signed in at the airport "
-            "before being notified of the reschedule?"
+            "before being notified of the scheduling disruption "
+            "(reschedule, LLL Swap notification, or any Company action) on this sequence?"
         ),
         "type": "yn",
     },
@@ -225,9 +226,9 @@ when lll_swap is selected: "lll_company_approved", "lll_swap_role", "is_reserve"
 "lll_was_deadhead", "post_swap_company_action", "lll_highest_value_leg", \
 "gave_away_reserve_status", "gave_away_reserve_day_type", \
 "gave_away_reserve_remaining_days", "is_changeover_sequence", \
-"held_carryover_at_conversion". The only ID you may select that is also \
-auto-injected is "has_premiums" — selecting it is harmless as the application \
-deduplicates.\
+"held_carryover_at_conversion". The only IDs you may select that are also \
+auto-injected are "has_premiums" and "had_reported" — selecting either is \
+harmless as the application deduplicates.\
 """
 
 TRIAGE_SCHEMA = {
@@ -312,11 +313,13 @@ error) and the second action may separately trigger §10.T.3. For the attempted 
 §10.T.3 may apply to that event independently even if had_reported = no for the \
 first event." If post_swap_company_action = no, analyze the attempted swap as the \
 sole Company-initiated disruption event and do not generate a second independent \
-claim. Additionally, if the attempted swap caused actual flying different from the \
-original published sequence (e.g., the FA flew or was released from a leg outside \
-their original schedule), flag Duty Rig (§11.D.5), Sit Rig (§11.D.6), and TAFB \
-Rig (§2.AAA/§11.D.4) for recalculation and generate standalone DirectConnect \
-claim blocks per the rig rules at the end of these instructions. \
+claim. Additionally, the attempted swap always causes actual flying different from the \
+original published sequence (swapped-onto unapproved: FA flew a non-scheduled \
+leg; gave-away unapproved: FA was deprived of a scheduled leg) — this condition \
+is definitively satisfied on all unapproved LLL swap paths; flag Duty Rig \
+(§11.D.5), Sit Rig (§11.D.6), and TAFB Rig (§2.AAA/§11.D.4) for recalculation \
+and generate standalone DirectConnect claim blocks per the rig rules at the end \
+of these instructions. \
 If lll_company_approved = yes, proceed with the role-based 10.P.4 analysis below. \
 If lll_company_approved was not answered, treat as unapproved (Company-initiated \
 framework) and flag in NOTES: "LLL Swap approval status not confirmed — applying \
@@ -394,7 +397,10 @@ Apply a causal test using post_swap_company_action: (a) if post_swap_company_act
 = yes (a separate Company action disrupted the FA's remaining flying after swap \
 completion), apply the had_reported gate before generating the 10.T.3 claim — if \
 had_reported = yes, generate a standalone 10.T.3 claim and note "10.T.3 survives — \
-caused by independent Company action after swap completion"; if had_reported = no \
+caused by independent Company action after swap completion; had_reported=yes \
+confirmed for the FIRST disruption — if this second Company action occurred on \
+a different duty day, verify FA was also post-report for THAT event (§10.T.3 \
+eligibility is per-event)"; if had_reported = no \
 (anchored to first disruption), flag in NOTES: "Verify: was the FA post-report at \
 the time of this Company action? If yes, §10.T.3 applies independently"; if \
 had_reported was not answered, include the 10.T.3 claim with the standard \
@@ -425,9 +431,17 @@ Company violations that occur after the swap is complete. Before suppressing any
 the scheduling error that triggers 10.T.3 was the LLL swap itself — suppress the \
 10.T.3 claim under 10.P.4 and note "10.T.3 suppressed — violation caused by LLL \
 swap; 10.P.4 bars claim"; (b) if post_swap_company_action = yes (a separate Company \
-action occurred after swap completion), that 10.T.3 claim is independent of the \
-swap and survives 10.P.4 — generate the 10.T.3 claim and note "10.T.3 survives \
-10.P.4 — caused by independent Company action after swap completion"; (c) if \
+action occurred after swap completion), apply the had_reported gate before \
+generating the 10.T.3 claim: if had_reported = yes, generate the 10.T.3 claim \
+and note "10.T.3 survives 10.P.4 — caused by independent Company action after \
+swap completion; had_reported=yes confirmed for the FIRST disruption — if this \
+second Company action occurred on a different duty day, verify FA was also \
+post-report for THAT event (§10.T.3 eligibility is per-event)"; if had_reported \
+= no (anchored to first disruption), flag in NOTES: "Verify: was the FA \
+post-report at the time of this independent Company action? If yes, §10.T.3 \
+applies independently despite had_reported=no for the first event"; if \
+had_reported was not answered, include the 10.T.3 claim with the standard \
+"Verify: was the FA post-report?" note; (c) if \
 post_swap_company_action was not answered, include the 10.T.3 claim and note in \
 NOTES: "Causal determination required — confirm whether this violation was caused \
 by the LLL swap itself (suppressed under 10.P.4) or by an independent Company \
