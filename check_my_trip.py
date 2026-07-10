@@ -432,6 +432,8 @@ def main():
     # lll_swap_role is always needed when lll_swap is selected; inject it here
     # rather than having Haiku decide — the depends_on gate handles display.
     selected = list(triage["questions_to_ask"])
+    if "split_or_replaced" in selected and "last_sequence" not in selected:
+        selected.insert(selected.index("split_or_replaced"), "last_sequence")
     if "lll_swap" in selected:
         idx = selected.index("lll_swap") + 1
         for qid in ["lll_swap_role", "is_reserve", "lll_highest_value_leg"]:
