@@ -125,11 +125,11 @@ QUESTIONS = {
             "(i.e., did it carry over credit/value from the prior bid month)?"
         ),
         "type": "yn",
-        "depends_on": {
-            "lll_swap": "yes",
-            "lll_company_approved": "yes",
-            "lll_swap_role": "I gave AWAY my last live leg (another FA flew it for me)",
-        },
+        # Gate only on lll_swap=yes — question is relevant on both approved and
+        # unapproved paths (§10.J.12 double-anchor applies regardless of approval
+        # status). On the approved swapped-onto path the answer is harmlessly
+        # collected; FINAL_SYSTEM suppresses pay claims there anyway.
+        "depends_on": {"lll_swap": "yes"},
     },
     "held_carryover_at_conversion": {
         "text": (
@@ -201,7 +201,7 @@ every provision that is POTENTIALLY triggered.
 2. Select which follow-up questions are needed to confirm ambiguous provisions. \
 Choose from exactly these IDs:
 
-  "last_sequence"     — select if ANY 10.J, 10.K, 10.L, or 10.M provision is flagged
+  "last_sequence"     — select if ANY 10.J, 10.K, 10.L, 10.M, or 10.T provision is flagged
   "had_reported"      — select if any 10.J, 10.K, 10.M, or 10.T provision is \
 flagged, OR if lll_swap is selected (because a post-swap Company action may \
 trigger §10.T.3 independently, requiring the post-report threshold to be confirmed)
@@ -291,7 +291,11 @@ use it to gate all 10.T.3 claims: if had_reported = yes, the FA was post-report 
 at the time of the disruption — §10.T.3 eligibility threshold is confirmed; if \
 had_reported = no, the disruption was pre-report — suppress §10.T.3 and analyze \
 under §10.J.2/§10.J.10 instead. Apply this gate to every 10.T.3 claim regardless \
-of LLL Swap status. If had_reported was not asked or not answered, include any \
+of LLL Swap status. Exception: when post_swap_company_action = yes, a second \
+independent Company action may establish its own 10.T.3 eligibility — do NOT \
+apply the global suppress to the second event; instead use the per-event \
+had_reported logic in the LLL Swap sections below. \
+If had_reported was not asked or not answered, include any \
 10.T.3 claim and note "Verify: was the FA post-report (signed in at the airport) \
 at the time of the disruption? If pre-report, §10.T.3 does not apply."
 - If LLL Swap is confirmed (yes), first check approval: if lll_company_approved = no, \
@@ -303,6 +307,22 @@ analyzed as Company-initiated scheduling change." Disregard any PROVISIONAL sequ
 10.T.3 150% calculation, use the original published sequence value BEFORE the \
 attempted swap — do not use post-disruption actual flying value, as the \
 attempted-but-unapproved swap may itself be the Company error triggering 10.T.3. \
+CHANGEOVER / §10.J.12 (applies to all unapproved-path cases regardless of \
+post_swap_company_action value): check is_changeover_sequence in answers — \
+if is_changeover_sequence = yes, check held_carryover_at_conversion: if the FA \
+was holding the sequence as a carryover at the time of conversion, apply a DOUBLE \
+ANCHOR: (1) use the carryover value from the prior bid month as the sequence base \
+(§10.J.12); (2) then apply the pre-swap anchor. Note in REMEDY: "DOUBLE ANCHOR: \
+(1) carryover value from prior bid month (§10.J.12); (2) pre-swap value — not \
+post-swap composition." If the FA picked it up after conversion, use only the \
+single pre-swap anchor. If is_changeover_sequence is not in answers, note in \
+REMEDY: "Verify with FA and Local: if this was a changeover sequence held as a \
+carryover, §10.J.12 double anchor applies." \
+CREW LEGALITY (unapproved path — applies regardless of post_swap_company_action): \
+the deadhead-to-live conversion question was not collected on this path; if the \
+LLL was originally a deadhead that converted to live flying, verify crew legality \
+for the live flight independently and flag in NOTES: "If LLL was a deadhead \
+converted to live flying, verify crew complement/rest legality for that segment." \
 If post_swap_company_action = yes, a SECOND independent Company action also occurred \
 after the failed swap attempt — generate standalone claims for each confirmed \
 independent violation; both the attempted swap (as a Company-initiated scheduling \
@@ -313,13 +333,7 @@ error) and the second action may separately trigger §10.T.3. For the attempted 
 §10.T.3 may apply to that event independently even if had_reported = no for the \
 first event." If post_swap_company_action = no, analyze the attempted swap as the \
 sole Company-initiated disruption event and do not generate a second independent \
-claim. Additionally, verify whether the sequence was a changeover sequence and, \
-if so, whether the FA held it as a carryover at the time it converted — if yes, \
-§10.J.12 applies a double anchor: use the carryover value from the prior bid month \
-as the sequence base (not the published changeover-sequence value), then apply the \
-pre-swap anchor; note in REMEDY: "DOUBLE ANCHOR: (1) carryover value from prior \
-bid month (§10.J.12); (2) pre-swap value — not post-swap composition. Verify \
-with FA and Local." Additionally, the attempted swap always causes actual flying different from the \
+claim. Additionally, the attempted swap always causes actual flying different from the \
 original published sequence (swapped-onto unapproved: FA flew a non-scheduled \
 leg; gave-away unapproved: FA was deprived of a scheduled leg) — this condition \
 is definitively satisfied on all unapproved LLL swap paths; flag Duty Rig \
@@ -393,12 +407,21 @@ day off — verify with Local whether any day-off protections under §12.B.2.d i
 with the retained pay protections; no active duty obligation exists for this day." \
 If gave_away_reserve_remaining_days is not in answers, the FA is a Lineholder — \
 skip 10.L.6 entirely; the Reserve eligibility gate does not apply. Otherwise, \
-apply 10.L.6 eligibility using gave_away_reserve_remaining_days: if \
-gave_away_reserve_remaining_days = no (no remaining Reserve days at time of \
-disruption), the Reserve qualifies for 10.L.1 — full pay+credit, no fly obligation; \
-if gave_away_reserve_remaining_days = yes (remaining Reserve days existed), 10.L.4 \
-applies instead — pay protected for cancelled portions, FA must still fly uncancelled \
-portions. Cite the applicable section (10.L.1 or 10.L.4) in SECTION and CLAIM. \
+apply 10.L.6 eligibility — but first note the §10.L.1 threshold: §10.L.1 requires \
+cancellation of the ENTIRE sequence, not merely the loss of one leg. On an LLL \
+gave-away path the FA surrendered only the LLL leg; the remainder of the sequence \
+may still exist. If the entire sequence was not cancelled (only the LLL leg was lost \
+and no separate Company action cancelled the remainder), §10.L.1 does not apply — \
+use §10.L.4 (pay protected for cancelled portions; FA must fly uncancelled portions) \
+as the default gave-away provision regardless of Reserve remaining-day status. Apply \
+§10.L.1 eligibility via §10.L.6 ONLY if the entire sequence was independently \
+cancelled (e.g., by a separate post_swap_company_action): if \
+gave_away_reserve_remaining_days = no, the Reserve then qualifies for 10.L.1 — \
+full pay+credit, no fly obligation; if gave_away_reserve_remaining_days = yes, \
+10.L.4 applies. If it is unclear whether the entire sequence was cancelled, note \
+in CLAIM: "Verify: was the FA's entire remaining sequence cancelled, or only the \
+LLL leg? §10.L.1 requires full-sequence cancellation; §10.L.4 applies otherwise." \
+Cite the applicable section (10.L.1 or 10.L.4) in SECTION and CLAIM. \
 Apply a causal test using post_swap_company_action: (a) if post_swap_company_action \
 = yes (a separate Company action disrupted the FA's remaining flying after swap \
 completion), apply the had_reported gate before generating the 10.T.3 claim — if \
