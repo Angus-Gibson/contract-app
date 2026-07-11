@@ -202,9 +202,9 @@ every provision that is POTENTIALLY triggered.
 Choose from exactly these IDs:
 
   "last_sequence"     — select if ANY 10.J, 10.K, 10.L, or 10.M provision is flagged
-  "had_reported"      — select if any 10.J or 10.T provision is flagged, OR if \
-lll_swap is selected (because a post-swap Company action may trigger §10.T.3 \
-independently, requiring the post-report threshold to be confirmed)
+  "had_reported"      — select if any 10.J, 10.K, 10.M, or 10.T provision is \
+flagged, OR if lll_swap is selected (because a post-swap Company action may \
+trigger §10.T.3 independently, requiring the post-report threshold to be confirmed)
   "split_or_replaced" — select if any 10.L provision is flagged (shown only when \
 last_sequence = yes)
   "lll_swap"          — select if any rescheduling provision (10.J/10.K/10.L/10.M/10.P) \
@@ -313,7 +313,13 @@ error) and the second action may separately trigger §10.T.3. For the attempted 
 §10.T.3 may apply to that event independently even if had_reported = no for the \
 first event." If post_swap_company_action = no, analyze the attempted swap as the \
 sole Company-initiated disruption event and do not generate a second independent \
-claim. Additionally, the attempted swap always causes actual flying different from the \
+claim. Additionally, verify whether the sequence was a changeover sequence and, \
+if so, whether the FA held it as a carryover at the time it converted — if yes, \
+§10.J.12 applies a double anchor: use the carryover value from the prior bid month \
+as the sequence base (not the published changeover-sequence value), then apply the \
+pre-swap anchor; note in REMEDY: "DOUBLE ANCHOR: (1) carryover value from prior \
+bid month (§10.J.12); (2) pre-swap value — not post-swap composition. Verify \
+with FA and Local." Additionally, the attempted swap always causes actual flying different from the \
 original published sequence (swapped-onto unapproved: FA flew a non-scheduled \
 leg; gave-away unapproved: FA was deprived of a scheduled leg) — this condition \
 is definitively satisfied on all unapproved LLL swap paths; flag Duty Rig \
@@ -639,25 +645,35 @@ def stream_final_output(
         "Generate the confirmed DirectConnect claim(s)."
     )
 
-    with client.messages.stream(
-        model="claude-opus-4-6",
-        max_tokens=4000,
-        thinking={"type": "adaptive"},
-        system=FINAL_SYSTEM,
-        messages=[{"role": "user", "content": user_message}],
-    ) as stream:
+    try:
+        stream_ctx = client.messages.stream(
+            model="claude-opus-4-6",
+            max_tokens=4000,
+            thinking={"type": "adaptive"},
+            system=FINAL_SYSTEM,
+            messages=[{"role": "user", "content": user_message}],
+        )
+    except anthropic.APIError as e:
+        sys.exit(f"ERROR: Final analysis API call failed — {e}\n"
+                 f"Your situation and answers have been lost. Re-run the tool to retry.")
+
+    with stream_ctx as stream:
         in_thinking = False
-        for event in stream:
-            if event.type == "content_block_start":
-                if event.content_block.type == "thinking":
-                    in_thinking = True
-                    print("[Confirming triggered provisions...]\n", flush=True)
-            elif event.type == "content_block_stop" and in_thinking:
-                in_thinking = False
-                print()
-            elif event.type == "content_block_delta":
-                if event.delta.type == "text_delta":
-                    print(event.delta.text, end="", flush=True)
+        try:
+            for event in stream:
+                if event.type == "content_block_start":
+                    if event.content_block.type == "thinking":
+                        in_thinking = True
+                        print("[Confirming triggered provisions...]\n", flush=True)
+                elif event.type == "content_block_stop" and in_thinking:
+                    in_thinking = False
+                    print()
+                elif event.type == "content_block_delta":
+                    if event.delta.type == "text_delta":
+                        print(event.delta.text, end="", flush=True)
+        except anthropic.APIError as e:
+            sys.exit(f"\nERROR: Streaming interrupted — {e}\n"
+                     f"Partial output above may be incomplete. Re-run the tool to retry.")
 
     print("\n")
     print("=" * 60)
@@ -741,7 +757,7 @@ def main():
             sys.exit("ERROR: Injection block integrity failure — LLL sub-questions missing from selected list.")
         if "has_premiums" not in selected:
             selected.append("has_premiums")
-    pay_protection_prefixes = ("10.J", "10.K", "10.L", "10.V", "16")
+    pay_protection_prefixes = ("10.J", "10.K", "10.L", "10.M", "10.T", "10.V", "16")
     if "has_premiums" not in selected and any(
         p["section"].startswith(pay_protection_prefixes)
         for p in triage["flagged_provisions"]
